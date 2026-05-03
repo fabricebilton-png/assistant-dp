@@ -16,7 +16,7 @@ function httpsGet(path, token) {
       res.on('data', c => chunks.push(c));
       res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString() }));
     });
-    req.on('error', e => resolve({ status: 500, body: JSON.stringify({ error: e.message }) }));
+    req.on('error', e => resolve({ status: 500, body: '{}' }));
     req.end();
   });
 }
@@ -37,7 +37,7 @@ function httpsPost(hostname, path, headers, body) {
 exports.handler = async function(event) {
   const cors = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, x-api-key',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json'
   };
@@ -48,15 +48,13 @@ exports.handler = async function(event) {
   let bodyObj = {};
   try { bodyObj = JSON.parse(event.body || '{}'); } catch(e) {}
 
-  // ── AIRTABLE SEARCH ─────────────────────────────────────────────
+  // ── AIRTABLE SEARCH ────────────────────────────────────────────
   if (bodyObj.action === 'airtable-search') {
     const q = (bodyObj.query || '').replace(/["']/g, '').substring(0, 50).toLowerCase();
     if (!q) return { statusCode: 200, headers: cors, body: JSON.stringify({ records: [] }) };
 
     const formula = `OR(SEARCH("${q}",LOWER({${FIELD_DESIGNATION}})),SEARCH("${q}",LOWER({${FIELD_REF}})))`;
-    const path = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
-      + `?filterByFormula=${encodeURIComponent(formula)}`
-      + `&fields[]=${FIELD_DESIGNATION}&fields[]=${FIELD_REF}&maxRecords=5`;
+    const path = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}?filterByFormula=${encodeURIComponent(formula)}&fields[]=${FIELD_DESIGNATION}&fields[]=${FIELD_REF}&maxRecords=5`;
 
     const result = await httpsGet(path, AIRTABLE_TOKEN);
     try {
@@ -76,14 +74,24 @@ exports.handler = async function(event) {
     }
   }
 
-  // ── CLAUDE API ───────────────────────────────────────────────────
-  // Lire la clé depuis le body (plus fiable que les headers sur Netlify)
-  const apiKey = (bodyObj.apiKey || '').trim();
-  if (!apiKey.startsWith('sk-ant-')) {
-    return { statusCode: 401, headers: cors, body: JSON.stringify({ error: { message: 'Clé API invalide' } }) };
+  // ── CLAUDE API ─────────────────────────────────────────────────
+  // Chercher la clé dans tous les endroits possibles
+  const apiKey = (
+    bodyObj.apiKey ||
+    event.headers['x-api-key'] ||
+    event.headers['X-Api-Key'] ||
+    event.headers['authorization'] ||
+    ''
+  ).trim().replace('Bearer ', '');
+
+  if (!apiKey || !apiKey.startsWith('sk-ant-')) {
+    return {
+      statusCode: 401, headers: cors,
+      body: JSON.stringify({ error: { message: 'Clé API invalide. Reçu: ' + apiKey.substring(0, 20) } })
+    };
   }
 
-  // Retirer apiKey du body avant d'envoyer à Anthropic
+  // Nettoyer apiKey du body avant envoi à Anthropic
   const { apiKey: _removed, ...cleanBody } = bodyObj;
   const bodyStr = JSON.stringify(cleanBody);
 
