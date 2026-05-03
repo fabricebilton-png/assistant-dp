@@ -37,7 +37,7 @@ function httpsPost(hostname, path, headers, body) {
 exports.handler = async function(event) {
   const cors = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, x-api-key',
+    'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json'
   };
@@ -48,7 +48,7 @@ exports.handler = async function(event) {
   let bodyObj = {};
   try { bodyObj = JSON.parse(event.body || '{}'); } catch(e) {}
 
-  // ── AIRTABLE SEARCH ────────────────────────────────────────────
+  // ── AIRTABLE SEARCH ─────────────────────────────────────────────
   if (bodyObj.action === 'airtable-search') {
     const q = (bodyObj.query || '').replace(/["']/g, '').substring(0, 50).toLowerCase();
     if (!q) return { statusCode: 200, headers: cors, body: JSON.stringify({ records: [] }) };
@@ -74,24 +74,13 @@ exports.handler = async function(event) {
     }
   }
 
-  // ── CLAUDE API ─────────────────────────────────────────────────
-  // Chercher la clé dans tous les endroits possibles
-  const apiKey = (
-    bodyObj.apiKey ||
-    event.headers['x-api-key'] ||
-    event.headers['X-Api-Key'] ||
-    event.headers['authorization'] ||
-    ''
-  ).trim().replace('Bearer ', '');
-
-  if (!apiKey || !apiKey.startsWith('sk-ant-')) {
-    return {
-      statusCode: 401, headers: cors,
-      body: JSON.stringify({ error: { message: 'Clé API invalide. Reçu: ' + apiKey.substring(0, 20) } })
-    };
+  // ── CLAUDE API — clé saisie par l'utilisateur ────────────────────
+  // La clé est dans le body, envoyée depuis le champ en haut à droite
+  const apiKey = (bodyObj.apiKey || '').trim();
+  if (!apiKey.startsWith('sk-ant-')) {
+    return { statusCode: 401, headers: cors, body: JSON.stringify({ error: { message: 'Clé API invalide — vérifiez le champ en haut à droite' } }) };
   }
 
-  // Nettoyer apiKey du body avant envoi à Anthropic
   const { apiKey: _removed, ...cleanBody } = bodyObj;
   const bodyStr = JSON.stringify(cleanBody);
 
