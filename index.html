@@ -355,8 +355,8 @@ async function analyze() {
     document.getElementById('loaderText').textContent = 'Génération de la commande...';
     const resp = await fetch('/api/claude', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: apiKey, model: 'claude-sonnet-4-5', max_tokens: 4000,
         messages: [{ role: 'user', content: [{ type: 'text', text: buildPrompt(msg, photoProducts) }] }]
       })
     });
