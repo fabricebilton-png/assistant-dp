@@ -7,365 +7,77 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --gold: #C9A84C;
-    --gold-light: #E8C97A;
-    --black: #0A0A0A;
-    --dark: #141414;
-    --panel: #1C1C1C;
-    --border: #2A2A2A;
-    --text: #F0EDE8;
-    --muted: #888;
-    --green: #2ECC71;
-    --orange: #F39C12;
-    --red: #E74C3C;
-    --radius: 10px;
+    --gold: #C9A84C; --gold-light: #E8C97A; --black: #0A0A0A; --dark: #141414;
+    --panel: #1C1C1C; --border: #2A2A2A; --text: #F0EDE8; --muted: #888;
+    --green: #2ECC71; --orange: #F39C12; --red: #E74C3C; --radius: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--black);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    font-size: 14px;
-  }
-
-  /* HEADER */
-  .header {
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--dark);
-  }
-  .logo {
-    width: 36px; height: 36px;
-    background: var(--gold);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 700; color: var(--black);
-    flex-shrink: 0;
-  }
+  body { background: var(--black); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; font-size: 14px; }
+  .header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--dark); }
+  .logo { width: 36px; height: 36px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--black); flex-shrink: 0; }
   .header-text h1 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: .02em; }
   .header-text p { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .api-config {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .api-input {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    width: 240px;
-    outline: none;
-  }
+  .api-config { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .api-input { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; width: 220px; outline: none; }
   .api-input:focus { border-color: var(--gold); }
   .api-input::placeholder { color: var(--muted); }
-  .api-status {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
-  }
+  .api-status { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
   .api-status.ok { background: var(--green); }
-
-  /* LAYOUT */
-  .layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    height: calc(100vh - 61px);
-  }
-
-  /* LEFT PANEL */
-  .left-panel {
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .panel-header {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-  }
-  .input-area {
-    flex: 1;
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-  }
-  textarea#waMessage {
-    width: 100%;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    line-height: 1.65;
-    resize: none;
-    flex: 1;
-    min-height: 180px;
-    outline: none;
-    transition: border-color .2s;
-  }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 61px); }
+  .left-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; }
+  .input-area { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+  textarea#waMessage { width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; line-height: 1.65; resize: none; flex: 1; min-height: 180px; outline: none; transition: border-color .2s; }
   textarea#waMessage:focus { border-color: var(--gold); }
   textarea#waMessage::placeholder { color: var(--muted); }
-
-  /* PHOTO DROP */
-  .photo-drop {
-    border: 1.5px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-    position: relative;
-  }
+  .photo-drop { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 16px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
   .photo-drop:hover, .photo-drop.drag { border-color: var(--gold); background: rgba(201,168,76,.05); }
-  .photo-drop input[type=file] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  }
+  .photo-drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
   .photo-drop-icon { font-size: 22px; margin-bottom: 6px; }
   .photo-drop p { font-size: 12px; color: var(--muted); }
   .photo-drop span { color: var(--gold); font-weight: 600; }
-
-  .photo-previews {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .photo-thumb {
-    width: 60px; height: 60px;
-    border-radius: 6px;
-    object-fit: cover;
-    border: 1px solid var(--border);
-    position: relative;
-  }
+  .photo-previews { display: flex; flex-wrap: wrap; gap: 8px; }
+  .photo-thumb { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); }
   .photo-thumb-wrap { position: relative; display: inline-block; }
-  .remove-photo {
-    position: absolute;
-    top: -5px; right: -5px;
-    background: var(--red);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 16px; height: 16px;
-    font-size: 10px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    line-height: 1;
-  }
-
-  .btn-analyze {
-    width: 100%;
-    padding: 13px;
-    background: var(--gold);
-    color: var(--black);
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity .15s, transform .1s;
-    letter-spacing: .03em;
-  }
+  .remove-photo { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border: none; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-analyze { width: 100%; padding: 13px; background: var(--gold); color: var(--black); border: none; border-radius: var(--radius); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s; letter-spacing: .03em; }
   .btn-analyze:hover { opacity: .88; }
   .btn-analyze:active { transform: scale(.98); }
   .btn-analyze:disabled { opacity: .4; cursor: not-allowed; }
-
-  /* RIGHT PANEL */
-  .right-panel {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    background: var(--dark);
-  }
-  .tab {
-    padding: 13px 20px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    transition: color .15s, border-color .15s;
-  }
+  .right-panel { display: flex; flex-direction: column; overflow: hidden; }
+  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--dark); }
+  .tab { padding: 13px 20px; font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-transform: uppercase; letter-spacing: .07em; transition: color .15s, border-color .15s; }
   .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
   .tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
   .tab-content.active { display: block; }
-
-  /* EMPTY STATE */
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    min-height: 200px;
-    gap: 10px;
-    color: var(--muted);
-    text-align: center;
-  }
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 200px; gap: 10px; color: var(--muted); text-align: center; }
   .empty-state .icon { font-size: 32px; opacity: .4; }
   .empty-state p { font-size: 13px; }
-
-  /* PRODUCT TABLE */
   .product-table { width: 100%; border-collapse: collapse; }
-  .product-table th {
-    text-align: left;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--muted);
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-  }
-  .product-table td {
-    padding: 10px 10px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    vertical-align: top;
-    line-height: 1.45;
-    font-size: 13px;
-  }
+  .product-table th { text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .06em; }
+  .product-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.45; font-size: 13px; }
   .product-table tr:last-child td { border-bottom: none; }
-  .ref-code {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--gold);
-    background: rgba(201,168,76,.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  .badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 100px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-  }
+  .ref-code { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); background: rgba(201,168,76,.1); padding: 2px 6px; border-radius: 4px; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: .04em; }
   .badge-ok { background: rgba(46,204,113,.15); color: #2ECC71; }
   .badge-warn { background: rgba(243,156,18,.15); color: #F39C12; }
   .badge-err { background: rgba(231,76,60,.15); color: #E74C3C; }
-
-  /* ADDRESS BLOCK */
-  .addr-block {
-    margin-top: 20px;
-    padding: 14px 16px;
-    background: var(--panel);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
-  .addr-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 8px;
-  }
+  .addr-block { margin-top: 20px; padding: 14px 16px; background: var(--panel); border-radius: var(--radius); border: 1px solid var(--border); }
+  .addr-label { font-size: 10px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
   .addr-block p { font-size: 13px; line-height: 1.7; color: var(--text); }
-
-  /* ALERTS */
   .alerts { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-  .alert {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    line-height: 1.5;
-    border-left: 3px solid;
-  }
+  .alert { padding: 10px 14px; border-radius: 8px; font-size: 12px; line-height: 1.5; border-left: 3px solid; }
   .alert-warn { background: rgba(243,156,18,.1); border-color: var(--orange); color: #F5C053; }
   .alert-err { background: rgba(231,76,60,.1); border-color: var(--red); color: #EC8076; }
-
-  /* WA MESSAGE */
-  .wa-msg-box {
-    background: var(--panel);
-    border-radius: var(--radius);
-    border-left: 3px solid #25D366;
-    padding: 16px 18px;
-    font-size: 13px;
-    line-height: 1.75;
-    color: var(--text);
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: 'DM Mono', monospace;
-    margin-bottom: 14px;
-  }
-  .btn-copy {
-    padding: 10px 24px;
-    background: #25D366;
-    color: white;
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity .15s;
-  }
+  .wa-msg-box { background: var(--panel); border-radius: var(--radius); border-left: 3px solid #25D366; padding: 16px 18px; font-size: 13px; line-height: 1.75; color: var(--text); white-space: pre-wrap; word-break: break-word; font-family: 'DM Mono', monospace; margin-bottom: 14px; }
+  .btn-copy { padding: 10px 24px; background: #25D366; color: white; border: none; border-radius: var(--radius); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
   .btn-copy:hover { opacity: .85; }
-
-  /* LOADER */
-  .loader {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 0;
-    color: var(--muted);
-    font-size: 13px;
-  }
+  .loader { display: none; align-items: center; gap: 10px; padding: 14px 0; color: var(--muted); font-size: 13px; }
   .loader.show { display: flex; }
-  .spinner {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ERROR */
-  .error-msg {
-    background: rgba(231,76,60,.1);
-    border: 1px solid rgba(231,76,60,.3);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #EC8076;
-    margin-bottom: 12px;
-  }
-
-  @media (max-width: 700px) {
-    .layout { grid-template-columns: 1fr; height: auto; }
-    .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
-    .api-config { display: none; }
-  }
+  .error-msg { background: rgba(231,76,60,.1); border: 1px solid rgba(231,76,60,.3); border-radius: var(--radius); padding: 12px 16px; font-size: 13px; color: #EC8076; margin-bottom: 12px; }
+  @media (max-width: 700px) { .layout { grid-template-columns: 1fr; height: auto; } .left-panel { border-right: none; border-bottom: 1px solid var(--border); } .api-config { display: none; } }
 </style>
 </head>
 <body>
@@ -378,12 +90,11 @@
   </div>
   <div class="api-config">
     <div class="api-status" id="apiStatus"></div>
-    <input class="api-input" type="password" id="apiKey" placeholder="sk-ant-api03-..." oninput="saveKey()" />
+    <input class="api-input" type="password" id="apiKey" placeholder="Clé API Anthropic" oninput="saveKey()" />
   </div>
 </div>
 
 <div class="layout">
-  <!-- LEFT -->
   <div class="left-panel">
     <div class="panel-header">📱 Message WhatsApp reçu</div>
     <div class="input-area">
@@ -413,19 +124,15 @@ Mohamed Dupont
         <span id="loaderText">Analyse en cours...</span>
       </div>
 
-      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">
-        Analyser la commande →
-      </button>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">Analyser la commande →</button>
     </div>
   </div>
 
-  <!-- RIGHT -->
   <div class="right-panel">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('list')" id="tab-list">📦 Liste produits</div>
       <div class="tab" onclick="switchTab('msg')" id="tab-msg">💬 Message WhatsApp</div>
     </div>
-
     <div class="tab-content active" id="view-list">
       <div class="empty-state" id="emptyList">
         <div class="icon">📋</div>
@@ -434,20 +141,13 @@ Mohamed Dupont
       <div id="listContent" style="display:none">
         <div id="errorMsg"></div>
         <table class="product-table" id="productTable">
-          <thead><tr>
-            <th>Produit</th>
-            <th>Réf Believe</th>
-            <th>Qté</th>
-            <th>Taille</th>
-            <th></th>
-          </tr></thead>
+          <thead><tr><th>Produit</th><th>Réf Believe</th><th>Qté</th><th>Taille</th><th></th></tr></thead>
           <tbody id="productBody"></tbody>
         </table>
         <div id="addrBlock"></div>
         <div class="alerts" id="alertsBlock"></div>
       </div>
     </div>
-
     <div class="tab-content" id="view-msg">
       <div class="empty-state" id="emptyMsg">
         <div class="icon">💬</div>
@@ -462,12 +162,6 @@ Mohamed Dupont
 </div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────
-const AIRTABLE_BASE = 'appouax19tnHJj0TD';
-const AIRTABLE_TABLE = 'tblGrm2yPn0ldTi01';
-const AIRTABLE_TOKEN = 'YOUR_AIRTABLE_TOKEN'; // Remplacez par votre token Airtable PAT
-
-// Villes françaises communes par code postal (partiel)
 const CP_VILLES = {
   '75001':'Paris 1er','75002':'Paris 2e','75003':'Paris 3e','75004':'Paris 4e',
   '75005':'Paris 5e','75006':'Paris 6e','75007':'Paris 7e','75008':'Paris 8e',
@@ -486,47 +180,59 @@ const CP_VILLES = {
   '34000':'Montpellier','76000':'Rouen','13100':'Aix-en-Provence'
 };
 
-// ─── API KEY ──────────────────────────────────────────────
+const API_KEY = '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';
 let photos = [];
 let lastResult = null;
 
-function saveKey() {
-  const k = document.getElementById('apiKey').value.trim();
-  if (k) {
-    localStorage.setItem('anthropic_key', k);
-    document.getElementById('apiStatus').className = 'api-status ok';
-  } else {
-    document.getElementById('apiStatus').className = 'api-status';
-  }
-}
-
 window.addEventListener('load', () => {
-  const saved = localStorage.getItem('anthropic_key');
-  if (saved) {
-    document.getElementById('apiKey').value = saved;
-    document.getElementById('apiStatus').className = 'api-status ok';
-  }
+  document.getElementById('apiKey').value = API_KEY;
+  document.getElementById('apiStatus').className = 'api-status ok';
 });
 
-// ─── PHOTO HANDLING ───────────────────────────────────────
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  document.getElementById('apiStatus').className = k ? 'api-status ok' : 'api-status';
+}
+
+function getKey() {
+  return document.getElementById('apiKey').value.trim() || API_KEY;
+}
+
 const dropZone = document.getElementById('dropZone');
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag');
-  handleFiles(e.dataTransfer.files);
-});
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+      const data = dataUrl.split(',')[1];
+      const kb = Math.round(data.length * 0.75 / 1024);
+      console.log('Image compressée:', file.name, kb + 'kb');
+      resolve({ data, type: 'image/jpeg', name: file.name, kb });
+    };
+    img.src = url;
+  });
+}
 
 function handleFiles(files) {
   for (const f of files) {
     if (!f.type.startsWith('image/')) continue;
-    const reader = new FileReader();
-    reader.onload = e => {
-      photos.push({ data: e.target.result.split(',')[1], type: f.type, name: f.name });
+    compressImage(f).then(compressed => {
+      photos.push(compressed);
       renderPreviews();
-    };
-    reader.readAsDataURL(f);
+    });
   }
 }
 
@@ -536,26 +242,20 @@ function renderPreviews() {
   photos.forEach((p, i) => {
     const wrap = document.createElement('div');
     wrap.className = 'photo-thumb-wrap';
-    wrap.innerHTML = `<img class="photo-thumb" src="data:${p.type};base64,${p.data}" title="${p.name}">
-      <button class="remove-photo" onclick="removePhoto(${i})">✕</button>`;
+    wrap.innerHTML = '<img class="photo-thumb" src="data:' + p.type + ';base64,' + p.data + '" title="' + p.name + ' (' + (p.kb||'?') + 'kb)"><button class="remove-photo" onclick="removePhoto(' + i + ')">✕</button>';
     container.appendChild(wrap);
   });
 }
 
-function removePhoto(i) {
-  photos.splice(i, 1);
-  renderPreviews();
-}
+function removePhoto(i) { photos.splice(i, 1); renderPreviews(); }
 
-// ─── TAB SWITCHING ────────────────────────────────────────
 function switchTab(tab) {
-  document.getElementById('tab-list').className = 'tab' + (tab==='list'?' active':'');
-  document.getElementById('tab-msg').className = 'tab' + (tab==='msg'?' active':'');
-  document.getElementById('view-list').className = 'tab-content' + (tab==='list'?' active':'');
-  document.getElementById('view-msg').className = 'tab-content' + (tab==='msg'?' active':'');
+  document.getElementById('tab-list').className = 'tab' + (tab==='list' ? ' active' : '');
+  document.getElementById('tab-msg').className = 'tab' + (tab==='msg' ? ' active' : '');
+  document.getElementById('view-list').className = 'tab-content' + (tab==='list' ? ' active' : '');
+  document.getElementById('view-msg').className = 'tab-content' + (tab==='msg' ? ' active' : '');
 }
 
-// ─── ADRESSE ENRICHISSEMENT ───────────────────────────────
 function enrichAdresse(adresse) {
   if (!adresse) return adresse;
   const cpMatch = adresse.match(/\b(\d{5})\b/);
@@ -569,14 +269,41 @@ function enrichAdresse(adresse) {
   return adresse;
 }
 
-// ─── MAIN ANALYZE ─────────────────────────────────────────
+
+// ── Recherche Airtable via proxy ─────────────────────────────────────
+async function searchAirtable(query) {
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'airtable-search', query })
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.records || [];
+  } catch(e) { console.error('Airtable search error:', e); return null; }
+}
+
+// Enrichit les produits avec les refs Airtable
+function enrichWithAirtable(products) {
+  for (const p of products) {
+    if (p.reference_believe && p.reference_believe !== 'N/A') continue;
+    const searchTerm = p.nom_propre || p.nom_original;
+    if (!searchTerm) continue;
+    const ref = findRefBelieve(searchTerm);
+    if (ref) {
+      p.reference_believe = ref;
+      p.statut = 'trouve';
+    }
+  }
+  return products;
+}
+
 async function analyze() {
   const apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('anthropic_key');
   if (!apiKey) { alert('Entrez votre clé API Anthropic dans le champ en haut à droite'); return; }
-
   const msg = document.getElementById('waMessage').value.trim();
   if (!msg) { alert('Collez un message WhatsApp à analyser'); return; }
-
   const btn = document.getElementById('analyzeBtn');
   btn.disabled = true;
   document.getElementById('loader').className = 'loader show';
@@ -588,33 +315,55 @@ async function analyze() {
   document.getElementById('errorMsg').innerHTML = '';
 
   try {
-    // Build message content
-    const content = [];
-    content.push({ type: 'text', text: buildPrompt(msg) });
-    for (const p of photos) {
-      content.push({ type: 'image', source: { type: 'base64', media_type: p.type, data: p.data } });
+    // Étape 1 : identifier les produits des photos
+    // Les images sont envoyées DIRECTEMENT à l'API Anthropic (pas via le proxy)
+    // car les images base64 sont trop lourdes pour Netlify Functions
+    let photoProducts = [];
+    if (photos.length > 0) {
+      for (let i = 0; i < photos.length; i++) {
+        const p = photos[i];
+        document.getElementById('loaderText').textContent = 'Analyse photo ' + (i+1) + '/' + photos.length + '...';
+        try {
+          const pr = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 200,
+              messages: [{ role: 'user', content: [
+                { type: 'image', source: { type: 'base64', media_type: p.type, data: p.data } },
+                { type: 'text', text: "Cette image est une capture du site doretdeplatineshop.com. Lis le fil de navigation ou le titre du produit et retourne UNIQUEMENT le nom exact du produit en une ligne, rien d'autre." }
+              ]}]
+            })
+          });
+          if (pr.ok) {
+            const pd = await pr.json();
+            const name = (pd.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+            if (name) photoProducts.push(name);
+          } else {
+            const errTxt = await pr.text();
+            console.error('Photo API error:', pr.status, errTxt.substring(0,200));
+          }
+        } catch(e) { console.warn('Photo ' + (i+1) + ' échouée:', e.message); }
+      }
     }
 
-    document.getElementById('loaderText').textContent = 'Appel à Claude...';
-
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    // Étape 2 : analyser texte + produits photos identifiés
+    document.getElementById('loaderText').textContent = 'Génération de la commande...';
+    const resp = await fetch('/api/claude', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content }]
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000,
+        messages: [{ role: 'user', content: [{ type: 'text', text: buildPrompt(msg, photoProducts) }] }]
       })
     });
 
     if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.error?.message || 'Erreur API ' + resp.status);
+      const rawErr = await resp.text();
+      throw new Error('Erreur ' + resp.status + ' — ' + rawErr.substring(0, 300));
     }
 
     const data = await resp.json();
@@ -622,127 +371,98 @@ async function analyze() {
 
     let json;
     try {
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
-      json = JSON.parse(clean.substring(s, e + 1));
+      let clean = raw.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      const s = clean.indexOf('{');
+      const e = clean.lastIndexOf('}');
+      if (s < 0) throw new Error('Aucun JSON trouvé dans la réponse');
+      let jsonStr = e >= 0 ? clean.substring(s, e + 1) : clean.substring(s);
+      try {
+        json = JSON.parse(jsonStr);
+      } catch(parseErr) {
+        // Tentative de réparation d'un JSON tronqué
+        jsonStr = jsonStr.replace(/,\s*$/, '').replace(/,\s*([\]}])/g, '$1');
+        let opens = 0, openB = 0, inStr = false, esc = false;
+        for (let i = 0; i < jsonStr.length; i++) {
+          const c = jsonStr[i];
+          if (esc) { esc = false; continue; }
+          if (c === '\\' && inStr) { esc = true; continue; }
+          if (c === '"') { inStr = !inStr; continue; }
+          if (!inStr) {
+            if (c === '{') opens++; else if (c === '}') opens--;
+            if (c === '[') openB++; else if (c === ']') openB--;
+          }
+        }
+        while (openB > 0) { jsonStr += ']'; openB--; }
+        while (opens > 0) { jsonStr += '}'; opens--; }
+        json = JSON.parse(jsonStr);
+      }
     } catch(pe) {
-      throw new Error('Réponse non parseable. Détail : ' + raw.substring(0, 300));
+      throw new Error('Réponse non parseable : ' + pe.message);
     }
 
-    // Enrich address
-    if (json.destinataire?.adresse) {
+    if (json.destinataire && json.destinataire.adresse) {
       json.destinataire.adresse = enrichAdresse(json.destinataire.adresse);
     }
 
+    // Enrichir les produits avec les refs Believe (catalogue local)
+    document.getElementById('loaderText').textContent = 'Recherche des références Believe...';
+    if (json.products && json.products.length > 0) {
+      json.products = enrichWithAirtable(json.products);
+    }
     lastResult = json;
     renderResults(json);
 
   } catch(e) {
-    document.getElementById('emptyList').style.display = 'flex';
-    document.getElementById('errorMsg').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
-    document.getElementById('listContent').style.display = 'block';
     document.getElementById('emptyList').style.display = 'none';
+    document.getElementById('listContent').style.display = 'block';
+    document.getElementById('errorMsg').innerHTML = '<div class="error-msg">⚠️ ' + esc(e.message) + '</div>';
   } finally {
     btn.disabled = false;
     document.getElementById('loader').className = 'loader';
   }
 }
 
-// ─── PROMPT BUILDER ───────────────────────────────────────
-function buildPrompt(msg) {
-  const photosDesc = photos.length > 0
-    ? `\n\nJ'ai joint ${photos.length} capture(s) d'écran du site doretdeplatineshop.com. Pour chaque image, identifie le nom exact du produit affiché dans le fil de navigation (breadcrumb) ou le titre de la page produit.`
+function buildPrompt(msg, photoProducts) {
+  photoProducts = photoProducts || [];
+  const photosDesc = photoProducts.length > 0
+    ? '\n\nProduits identifiés depuis les captures du site doretdeplatineshop.com:\n' + photoProducts.map(function(p,i){ return '- Photo '+(i+1)+': '+p; }).join('\n')
     : '';
 
-  return `Tu es un assistant pour la boutique D'or et de Platine (doretdeplatineshop.com), boutique officielle de JuL gérée par Believe.
-
-Analyse ce message WhatsApp de commande et retourne UNIQUEMENT un JSON brut sans markdown.${photosDesc}
-
-RÈGLES ADRESSE :
-- Si code postal présent sans ville → déduis la ville (ex: 13012 → Marseille 12e)
-- Si ville présente sans code postal → note qu'il manque le CP
-- Vérifie cohérence CP/ville
-
-RÈGLES ALERTES :
-- Signale si adresse incomplète (manque rue, CP, ville ou téléphone)
-- Signale si quantité manquante pour un article
-- Signale si taille manquante pour un article textil (pas pour accessoires/disques)
-
-Format JSON attendu :
-{
-  "products": [
-    {
-      "nom_original": "texte brut du message ou description de la photo",
-      "nom_propre": "nom officiel du produit tel qu'affiché sur le site",
-      "reference_believe": "N/A si inconnu",
-      "quantite": 1,
-      "taille": "taille ou N/A",
-      "statut": "trouve" ou "manuel" ou "introuvable",
-      "source": "texte" ou "photo"
-    }
-  ],
-  "destinataire": {
-    "nom": "...",
-    "adresse": "adresse complète avec ville déduite si possible",
-    "telephone": "..."
-  },
-  "alertes": [
-    {"type": "warning" ou "error", "message": "description de l'alerte"}
-  ],
-  "message_whatsapp": "message complet WhatsApp formaté avec *gras* pour WhatsApp, emojis, récapitulatif produits avec refs, adresse, et demande de confirmation. Signale les infos manquantes directement dans le message."
+  return 'Tu es un assistant pour la boutique D\'or et de Platine (doretdeplatineshop.com), boutique officielle de JuL gérée par Believe.\n\nTu as accès à la base Airtable (base ID: appouax19tnHJj0TD, table PRODUIT: tblGrm2yPn0ldTi01). Pour chaque produit identifié dans le message, utilise l\'outil Airtable search_records pour chercher le nom du produit dans le champ Designation et récupérer la Réf Believe correspondante (champ fld02IfEMQb0zorrD).\n\nAnalyse ce message WhatsApp de commande et retourne UNIQUEMENT un JSON brut sans markdown ni texte autour.' + photosDesc + '\n\nRÈGLES ADRESSE :\n- Si code postal présent sans ville → déduis la ville (ex: 13012 → Marseille 12e)\n- Si ville présente sans code postal → note qu\'il manque le CP\n- Vérifie cohérence CP/ville\n\nRÈGLES ALERTES :\n- Signale si adresse incomplète (manque rue, CP, ville ou téléphone)\n- Signale si quantité manquante pour un article\n- Signale si taille manquante pour un article textile\n\nFormat JSON :\n{\n  "products": [\n    {\n      "nom_original": "texte brut du message ou description photo",\n      "nom_propre": "nom officiel Airtable du produit",\n      "reference_believe": "réf trouvée dans Airtable ou N/A",\n      "quantite": 1,\n      "taille": "taille ou N/A",\n      "statut": "trouve" ou "manuel" ou "introuvable",\n      "source": "texte" ou "photo"\n    }\n  ],\n  "destinataire": {\n    "nom": "...",\n    "adresse": "adresse complète avec ville déduite si possible",\n    "telephone": "..."\n  },\n  "alertes": [\n    {"type": "warning" ou "error", "message": "description de l\'alerte"}\n  ],\n  "message_whatsapp": "message WhatsApp complet avec *gras*, emojis, récapitulatif produits avec refs Believe, adresse, et demande de confirmation. Signale les infos manquantes dans le message."\n}\n\nMessage à analyser :\n' + msg;
 }
 
-Message à analyser :
-${msg}`;
-}
-
-// ─── RENDER RESULTS ───────────────────────────────────────
 function renderResults(json) {
   const prods = json.products || [];
   const dest = json.destinataire || {};
   const alertes = json.alertes || [];
 
-  // Products table
   let rows = '';
   for (const p of prods) {
     const bc = p.statut==='trouve' ? 'badge-ok' : p.statut==='introuvable' ? 'badge-err' : 'badge-warn';
     const bl = p.statut==='trouve' ? 'Trouvé' : p.statut==='introuvable' ? 'Introuvable' : 'Manuel';
     const src = p.source === 'photo' ? ' 📸' : '';
     const ref = p.reference_believe && p.reference_believe !== 'N/A'
-      ? `<span class="ref-code">${esc(p.reference_believe)}</span>`
+      ? '<span class="ref-code">' + esc(p.reference_believe) + '</span>'
       : '<span style="color:var(--muted)">—</span>';
-    rows += `<tr>
-      <td>${esc(p.nom_propre || p.nom_original)}${src}</td>
-      <td>${ref}</td>
-      <td>${p.quantite || '—'}</td>
-      <td>${esc(p.taille || '—')}</td>
-      <td><span class="badge ${bc}">${bl}</span></td>
-    </tr>`;
+    rows += '<tr><td>' + esc(p.nom_propre || p.nom_original) + src + '</td><td>' + ref + '</td><td>' + (p.quantite || '—') + '</td><td>' + esc(p.taille || '—') + '</td><td><span class="badge ' + bc + '">' + bl + '</span></td></tr>';
   }
   document.getElementById('productBody').innerHTML = rows;
 
-  // Address
   let addrHtml = '';
   if (dest.nom || dest.adresse || dest.telephone) {
-    addrHtml = `<div class="addr-block">
-      <div class="addr-label">📍 Livraison</div>
-      <p><strong>${esc(dest.nom||'—')}</strong><br>${esc(dest.adresse||'—')}<br>${esc(dest.telephone||'—')}</p>
-    </div>`;
+    addrHtml = '<div class="addr-block"><div class="addr-label">📍 Livraison</div><p><strong>' + esc(dest.nom||'—') + '</strong><br>' + esc(dest.adresse||'—') + '<br>' + esc(dest.telephone||'—') + '</p></div>';
   }
   document.getElementById('addrBlock').innerHTML = addrHtml;
 
-  // Alerts
   let alertsHtml = '';
   for (const a of alertes) {
-    const cls = a.type === 'error' ? 'alert-err' : 'alert-warn';
-    alertsHtml += `<div class="alert ${cls}">⚠️ ${esc(a.message)}</div>`;
+    alertsHtml += '<div class="alert ' + (a.type==='error' ? 'alert-err' : 'alert-warn') + '">⚠️ ' + esc(a.message) + '</div>';
   }
   document.getElementById('alertsBlock').innerHTML = alertsHtml;
 
   document.getElementById('emptyList').style.display = 'none';
   document.getElementById('listContent').style.display = 'block';
 
-  // WA Message
   if (json.message_whatsapp) {
     document.getElementById('waOutput').textContent = json.message_whatsapp;
     document.getElementById('emptyMsg').style.display = 'none';
@@ -750,9 +470,8 @@ function renderResults(json) {
   }
 }
 
-// ─── COPY ─────────────────────────────────────────────────
 function copyMsg() {
-  if (!lastResult?.message_whatsapp) return;
+  if (!lastResult || !lastResult.message_whatsapp) return;
   navigator.clipboard.writeText(lastResult.message_whatsapp).then(() => {
     const btn = document.querySelector('.btn-copy');
     btn.textContent = '✅ Copié !';
