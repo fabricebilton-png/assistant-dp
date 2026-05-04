@@ -266,7 +266,7 @@ async function go() {
             max_tokens: 100,
             messages: [{ role: 'user', content: [
               { type: 'image', source: { type: 'base64', media_type: photos[i].type, data: photos[i].data } },
-              { type: 'text', text: "Capture du site doretdeplatineshop.com. Lis uniquement le nom exact du produit dans le fil de navigation ou le titre. Réponds avec juste le nom, rien d'autre." }
+              { type: 'text', text: "Cette image est une capture d'écran du site doretdeplatineshop.com. Identifie le nom exact du produit en cherchant dans cet ordre : 1) le titre du produit en gras sur la page (ex: MAILLOT - ENERGY SAMBA), 2) le fil de navigation breadcrumb en haut (ex: Accueil / ... / CASQUETTE - D&P CLUB), 3) le titre de l'onglet du navigateur. Réponds UNIQUEMENT avec le nom exact du produit tel qu'il apparaît sur le site, sans aucun autre texte." }
             ]}]
           })
         });
