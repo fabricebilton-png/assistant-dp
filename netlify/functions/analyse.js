@@ -62,7 +62,7 @@ Retourne UNIQUEMENT un JSON brut sans markdown :
   ],
   "destinataire": {"nom":"...","adresse":"adresse complète avec ville déduite","telephone":"..."},
   "alertes": [{"type":"warning","message":"..."}],
-  "message_whatsapp": "Message WhatsApp complet avec *gras*, emojis, séparateurs ━━━, récapitulatif produits avec refs Believe, adresse, et demande de confirmation. Signale les infos manquantes."
+  "message_whatsapp": "Message WhatsApp complet avec *gras*, emojis, séparateurs ━━━, récapitulatif produits avec refs Believe, adresse, et demande de confirmation. Signale les infos manquantes. IMPORTANT : utilise toujours le tutoiement (tu, toi, ton, ta, tes) dans ce message."
 }
 
 Message à analyser :
