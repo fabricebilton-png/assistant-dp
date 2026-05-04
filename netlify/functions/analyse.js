@@ -80,8 +80,8 @@ Message:${message}`;
     const noms = result.products.map((p,i) => `${i+1}:"${p.nom_propre||p.nom_original}"`).join(',');
     // Prompt ultra-court : Claude cherche dans Airtable et retourne juste les refs
     const p2 = `Airtable base appouax19tnHJj0TD table tblGrm2yPn0ldTi01.
-Pour chaque produit, utilise search_records pour chercher dans le champ "Réf Believe" et "Designation". Retourne la valeur exacte du champ "Réf Believe" trouvé.
-Retourne UNIQUEMENT:[{"i":1,"r":"valeur exacte du champ Réf Believe ou N/A"}]
+Pour chaque produit: 1) utilise search_records avec les champs ["Designation","Réf Believe"] pour chercher le produit, 2) prends le premier record ID retourné, 3) utilise list_records_for_table avec ce recordId et fieldIds ["Designation","Réf Believe"] pour lire la valeur du champ "Réf Believe".
+Retourne UNIQUEMENT:[{"i":1,"r":"REF ou N/A"}]
 Produits:${noms}`;
 
     try {
