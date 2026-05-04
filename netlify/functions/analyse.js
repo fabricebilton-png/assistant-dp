@@ -3,8 +3,10 @@ const https = require('https');
 const AIRTABLE_TOKEN = 'pataBCeGvhlN3N4Uq.cfa8a096a4b28fac19de4ea8006778cc5822fa610b9a2615cc144a4290e6a185';
 const AIRTABLE_BASE  = 'appouax19tnHJj0TD';
 const AIRTABLE_TABLE = 'tblGrm2yPn0ldTi01';
-const F_REF    = 'fld02IfEMQb0zorrD';
-const F_DESIGN = 'fldba0MGx8lL3TQWS';
+const F_REF      = 'fld02IfEMQb0zorrD';
+const F_DESIGN   = 'fldba0MGx8lL3TQWS';
+const F_CATEGORIE = 'fldayu3Yn6iraIcns';
+const F_CREATED  = 'fldq1uaM2giuThUtK';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -60,15 +62,13 @@ function getText(data) {
   return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
 }
 
-// Recherche via filterByFormula (API REST standard Airtable)
-// Même logique que search_records + list_records_for_table
+// Recherche ref via filterByFormula (API REST standard Airtable)
 async function findRef(nomProduit) {
   try {
-    // Extraire mots discriminants
     const stopwords = new Set(['maillot','casquette','sweat','short','pantalon','veste',
       'shirt','pack','coque','ensemble','survêtement','survetement','jogging',
       'chevaliere','chevalière','cagoule','coupe','imperméable','impermeable',
-      'tshirt','ballon','vinyle','album']);
+      'ballon','vinyle','album','tshirt','accessoire','totebag','sac']);
 
     const mots = nomProduit.split(/[\s\-–—_\/]+/)
       .filter(w => w.length > 3 && !stopwords.has(w.toLowerCase()));
@@ -79,43 +79,74 @@ async function findRef(nomProduit) {
 
     if (keywords.length === 0) return null;
 
-    // Construire formula SEARCH pour chaque mot-clé
-    const conditions = keywords.map(k =>
-      `SEARCH("${k.toLowerCase().replace(/"/g,'')}", LOWER({${F_DESIGN}}))`
-    );
-    const formula = conditions.length > 1
-      ? `AND(${conditions.join(',')})`
-      : conditions[0];
+    // Essai 1 : AND avec les mots les plus discriminants
+    const conds = keywords.map(k => `SEARCH("${k.toLowerCase().replace(/"/g,'')}", LOWER({${F_DESIGN}}))`);
+    const formula1 = conds.length > 1 ? `AND(${conds.join(',')})` : conds[0];
 
-    const path = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
-      + `?filterByFormula=${encodeURIComponent(formula)}`
-      + `&fields[]=${F_DESIGN}&fields[]=${F_REF}`
-      + `&maxRecords=3`;
+    const path1 = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
+      + `?filterByFormula=${encodeURIComponent(formula1)}`
+      + `&fields[]=${F_DESIGN}&fields[]=${F_REF}&maxRecords=3`;
 
-    const res = await airtableGet(path);
-
-    if (!res.records || res.records.length === 0) {
-      // Fallback : chercher avec un seul mot si AND ne donne rien
-      if (keywords.length > 1) {
-        const formula2 = `SEARCH("${keywords[0].toLowerCase().replace(/"/g,'')}", LOWER({${F_DESIGN}}))`;
-        const path2 = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
-          + `?filterByFormula=${encodeURIComponent(formula2)}`
-          + `&fields[]=${F_DESIGN}&fields[]=${F_REF}`
-          + `&maxRecords=3`;
-        const res2 = await airtableGet(path2);
-        if (!res2.records || res2.records.length === 0) return null;
-        const fields2 = res2.records[0].fields || {};
-        return fields2[F_REF] || fields2['Réf Believe'] || null;
-      }
-      return null;
+    const res1 = await airtableGet(path1);
+    if (res1.records && res1.records.length > 0) {
+      const fields = res1.records[0].fields || {};
+      const ref = fields[F_REF] || fields['Réf Believe'];
+      if (ref) return { ref, nom: fields[F_DESIGN] || fields['Designation'], fallback: false };
     }
 
-    // Lire les champs — l'API REST retourne dans .fields (pas cellValuesByFieldId)
-    const fields = res.records[0].fields || {};
-    return fields[F_REF] || fields['Réf Believe'] || null;
+    // Essai 2 : fallback avec OR sur chaque mot seul
+    if (keywords.length > 1) {
+      const formula2 = `OR(${conds.join(',')})`;
+      const path2 = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
+        + `?filterByFormula=${encodeURIComponent(formula2)}`
+        + `&fields[]=${F_DESIGN}&fields[]=${F_REF}&maxRecords=3`;
+      const res2 = await airtableGet(path2);
+      if (res2.records && res2.records.length > 0) {
+        const fields = res2.records[0].fields || {};
+        const ref = fields[F_REF] || fields['Réf Believe'];
+        if (ref) return { ref, nom: fields[F_DESIGN] || fields['Designation'], fallback: false };
+      }
+    }
 
+    return null;
   } catch(e) {
     console.error('findRef error:', nomProduit, e.message);
+    return null;
+  }
+}
+
+// Fallback : derniers produits créés pour une catégorie
+async function findLatestByCategory(categorie) {
+  try {
+    // Mapper le type de produit vers la catégorie Airtable
+    const catMap = {
+      'casquette': 'CASQUETTE', 'cap': 'CASQUETTE',
+      'tshirt': 'TEXTILE', 'shirt': 'TEXTILE', 'maillot': 'TEXTILE',
+      'sweat': 'TEXTILE', 'survêtement': 'TEXTILE', 'survetement': 'TEXTILE',
+      'short': 'TEXTILE', 'pantalon': 'TEXTILE', 'veste': 'TEXTILE',
+      'accessoire': 'ACCESSOIRE', 'chevalière': 'ACCESSOIRE', 'chevaliere': 'ACCESSOIRE',
+      'disque': 'DISQUE', 'vinyle': 'DISQUE', 'cd': 'DISQUE',
+      'claquette': 'TEXTILE', 'chaussette': 'TEXTILE',
+    };
+    const catKey = Object.keys(catMap).find(k => categorie.toLowerCase().includes(k));
+    const airtableCategorie = catKey ? catMap[catKey] : null;
+    if (!airtableCategorie) return null;
+
+    const formula = `{${F_CATEGORIE}}="${airtableCategorie}"`;
+    const path = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
+      + `?filterByFormula=${encodeURIComponent(formula)}`
+      + `&fields[]=${F_DESIGN}&fields[]=${F_REF}&fields[]=${F_CATEGORIE}`
+      + `&sort[0][field]=${F_CREATED}&sort[0][direction]=desc`
+      + `&maxRecords=1`;
+
+    const res = await airtableGet(path);
+    if (!res.records || res.records.length === 0) return null;
+
+    const fields = res.records[0].fields || {};
+    const ref = fields[F_REF] || fields['Réf Believe'];
+    const nom = fields[F_DESIGN] || fields['Designation'];
+    return ref ? { ref, nom, fallback: true } : null;
+  } catch(e) {
     return null;
   }
 }
@@ -155,11 +186,12 @@ exports.handler = async function(event) {
     : '';
 
   // ── ÉTAPE 1 : Haiku analyse le message ───────────────────────────
-  const p1 = `Assistant D'or et de Platine. Analyse ce message WhatsApp et extrait TOUS les produits et infos de livraison.${photosCtx}
+  const p1 = `Tu es un assistant pour D'or et de Platine. Analyse ce message WhatsApp et extrait TOUS les produits et infos de livraison.${photosCtx}
 CP→ville: 13012=Marseille 12e,75001=Paris 1er,69001=Lyon 1er,33000=Bordeaux,06000=Nice,31000=Toulouse,59000=Lille,44000=Nantes,76000=Rouen,67000=Strasbourg,13100=Aix-en-Provence.
 Alertes: adresse incomplète,quantité manquante,taille manquante(textile).
+Pour chaque produit, extrais aussi le type générique (casquette/tshirt/sweat/survêtement/short/pantalon/veste/claquette/accessoire/disque/vinyle).
 JSON UNIQUEMENT:
-{"products":[{"nom_original":"","nom_propre":"nom exact tel qu'affiché sur doretdeplatineshop.com","quantite":1,"taille":"","source":"texte ou photo"}],"destinataire":{"nom":"","adresse":"adresse complète avec ville déduite","telephone":""},"alertes":[{"type":"warning","message":""}]}
+{"products":[{"nom_original":"","nom_propre":"nom exact tel qu'affiché sur doretdeplatineshop.com","type_produit":"type générique","quantite":1,"taille":"","source":"texte ou photo"}],"destinataire":{"nom":"","adresse":"adresse complète avec ville déduite","telephone":""},"alertes":[{"type":"warning","message":""}]}
 Message: ${message}`;
 
   let result;
@@ -171,32 +203,49 @@ Message: ${message}`;
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
   }
 
-  // ── ÉTAPE 2 : Chercher refs via Airtable REST filterByFormula ─────
+  // ── ÉTAPE 2 : Chercher refs + fallback derniers produits ──────────
   if (result.products) {
     for (const p of result.products) {
       const nom = (p.nom_propre || p.nom_original || '').trim();
       p.reference_believe = 'N/A';
       p.statut = 'introuvable';
       if (!nom) continue;
-      const ref = await findRef(nom);
-      if (ref) { p.reference_believe = ref; p.statut = 'trouve'; }
+
+      // Cherche par nom
+      const found = await findRef(nom);
+      if (found) {
+        p.reference_believe = found.ref;
+        if (found.nom) p.nom_propre = found.nom;
+        p.statut = 'trouve';
+      } else {
+        // Fallback : dernier produit créé du même type
+        const latest = await findLatestByCategory(p.type_produit || nom);
+        if (latest) {
+          p.reference_believe = latest.ref;
+          p.nom_propre = latest.nom;
+          p.statut = 'fallback';
+        }
+      }
     }
   }
 
   // ── ÉTAPE 3 : Haiku génère le message WhatsApp ───────────────────
   const d = result.destinataire || {};
-  const lines = (result.products || []).map(p =>
-    `${p.nom_propre||p.nom_original} | Réf: ${p.reference_believe||'N/A'} | Qté: ${p.quantite||'?'} | Taille: ${p.taille||'?'}`
-  ).join('\n');
+  const lines = (result.products || []).map(p => {
+    const statut = p.statut === 'fallback' ? ' ⚠️ (dernier produit créé - à vérifier)' : '';
+    return `${p.nom_propre||p.nom_original} | Réf: ${p.reference_believe||'N/A'} | Qté: ${p.quantite||'?'} | Taille: ${p.taille||'?'}${statut}`;
+  }).join('\n');
   const alts = (result.alertes || []).map(a => a.message).join('\n');
 
   try {
     const r = await claudeCall(apiKey, [{ role: 'user', content:
-      `Message WhatsApp confirmation D'or et de Platine. Tutoiement, *gras*, emojis, ━━━.
+      `Génère un message WhatsApp de confirmation de commande D'or et de Platine.
+IMPORTANT: Utilise le tutoiement (tu/toi/ton/ta/tes) mais reste professionnel et courtois, sans familiarité excessive.
+Utilise *gras*, emojis appropriés, séparateurs ━━━.
 Produits:\n${lines}
 Livraison: ${d.nom||'?'}, ${d.adresse||'?'}, ${d.telephone||'?'}
-${alts?'⚠️ Manquant:\n'+alts:''}
-Retourne UNIQUEMENT le message WhatsApp.` }], 500);
+${alts?'Infos manquantes à signaler:\n'+alts:''}
+Retourne UNIQUEMENT le message WhatsApp.` }], 600);
     if (r.status === 200) result.message_whatsapp = getText(r.data);
   } catch(e) {}
 
