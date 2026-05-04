@@ -46,10 +46,10 @@ function post(hostname, path, headers, body) {
 
 async function searchAirtable(query) {
   const q = query.replace(/["']/g, '').substring(0, 60).toLowerCase();
-  const formula = `OR(SEARCH("${q}",LOWER({${FIELD_DESIGNATION}})),SEARCH("${q}",LOWER({${FIELD_REF}})))`;
+  const formula = `OR(SEARCH("${q}",LOWER({Designation})),SEARCH("${q}",LOWER({R\u00e9f Believe})))`;
   const path = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
     + `?filterByFormula=${encodeURIComponent(formula)}`
-    + `&fields[]=${FIELD_DESIGNATION}&fields[]=${FIELD_REF}&maxRecords=3`;
+    + `&fields[]=${encodeURIComponent('Designation')}&fields[]=${encodeURIComponent('R\u00e9f Believe')}&maxRecords=3`;
 
   const res = await get('api.airtable.com', path, {
     'Authorization': `Bearer ${AIRTABLE_TOKEN}`
@@ -60,8 +60,8 @@ async function searchAirtable(query) {
 
   const fields = data.records[0].fields || {};
   return {
-    nom: fields[FIELD_DESIGNATION] || null,
-    ref: fields[FIELD_REF] || null
+    nom: fields['Designation'] || fields[FIELD_DESIGNATION] || null,
+    ref: fields['Réf Believe'] || fields[FIELD_REF] || null
   };
 }
 
