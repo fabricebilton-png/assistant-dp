@@ -9,8 +9,6 @@
 :root{--gold:#C9A84C;--black:#0A0A0A;--dark:#141414;--panel:#1C1C1C;--border:#2A2A2A;--text:#F0EDE8;--muted:#888;--green:#2ECC71;--orange:#F39C12;--red:#E74C3C;--radius:10px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--black);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;font-size:14px}
-
-/* HEADER */
 .hdr{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--dark)}
 .logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--black);flex-shrink:0}
 .ht h1{font-size:15px;font-weight:600}.ht p{font-size:12px;color:var(--muted);margin-top:2px}
@@ -19,15 +17,11 @@ body{background:var(--black);color:var(--text);font-family:'Syne',sans-serif;min
 .kdot.ok{background:var(--green)}
 .kinput{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;width:260px;outline:none}
 .kinput:focus{border-color:var(--gold)}.kinput::placeholder{color:var(--muted)}
-
-/* LAYOUT */
 .lay{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 61px)}
 .left{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .right{display:flex;flex-direction:column;overflow:hidden}
 .ptitle{padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.1em}
 .iwrap{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
-
-/* INPUTS */
 textarea{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;line-height:1.65;resize:none;flex:1;min-height:180px;outline:none;transition:border-color .2s}
 textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)}
 .dz{border:1.5px dashed var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s}
@@ -44,16 +38,12 @@ textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)
 @keyframes spin{to{transform:rotate(360deg)}}
 .bgo{width:100%;padding:12px;background:var(--gold);color:var(--black);border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:opacity .15s}
 .bgo:hover{opacity:.85}.bgo:disabled{opacity:.4;cursor:not-allowed}
-
-/* TABS */
 .tabs{display:flex;background:var(--dark);border-bottom:1px solid var(--border)}
 .tab{padding:12px 20px;font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.07em;transition:color .15s,border-color .15s}
 .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
 .tv{flex:1;overflow-y:auto;padding:20px;display:none}.tv.on{display:block}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:10px;color:var(--muted);text-align:center}
 .empty .ei{font-size:30px;opacity:.35}.empty p{font-size:13px}
-
-/* TABLEAU PRODUITS */
 .pt{width:100%;border-collapse:collapse;font-size:12.5px}
 .pt th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
 .pt td{padding:9px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;line-height:1.4}
@@ -63,27 +53,21 @@ textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)
 .bok{background:rgba(46,204,113,.15);color:#2ECC71}
 .bwarn{background:rgba(243,156,18,.15);color:#F39C12}
 .berr{background:rgba(231,76,60,.15);color:#E74C3C}
-
-/* ADRESSE */
 .acard{margin-top:14px;background:var(--panel);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px}
 .albl{font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 .acard p{font-size:13px;line-height:1.7}
-
-/* ALERTES */
 .alts{margin-top:12px;display:flex;flex-direction:column;gap:8px}
 .alert{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5;border-left:3px solid}
 .awarn{background:rgba(243,156,18,.1);border-color:var(--orange);color:#F5C053}
 .aerr{background:rgba(231,76,60,.1);border-color:var(--red);color:#EC8076}
-
-/* MESSAGE WA */
-.wabox{background:var(--panel);border-left:3px solid #25D366;border-radius:var(--radius);padding:16px 18px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word;font-family:'DM Mono',monospace;margin-bottom:12px}
-.bcp{padding:10px 24px;background:#25D366;color:white;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.wabox{background:var(--panel);border-left:3px solid #25D366;border-radius:var(--radius);padding:16px 18px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word;font-family:'DM Mono',monospace;margin-bottom:14px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.bcp{padding:10px 20px;background:#25D366;color:white;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;flex:1}
 .bcp:hover{opacity:.85}
-
-/* ERREUR */
+.bemail{padding:10px 20px;background:var(--panel);color:var(--gold);border:1px solid var(--gold);border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;flex:1}
+.bemail:hover{opacity:.85}
 .ebox{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:#EC8076;margin-bottom:12px;line-height:1.5;word-break:break-all}
-
-@media(max-width:640px){.lay{grid-template-columns:1fr;height:auto}.left{border-right:none;border-bottom:1px solid var(--border)}.ka{display:none}}
+@media(max-width:640px){.lay{grid-template-columns:1fr;height:auto}.left{border-right:none;border-bottom:1px solid var(--border)}.ka{display:none}.btns{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -101,30 +85,21 @@ textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)
 </div>
 
 <div class="lay">
-  <!-- GAUCHE : saisie -->
   <div class="left">
     <div class="ptitle">📱 Message WhatsApp reçu</div>
     <div class="iwrap">
       <textarea id="mi" rows="10" placeholder="Collez ici le message WhatsApp reçu...&#10;&#10;Exemple :&#10;Bonjour, je voudrais 2 casquettes D&P Club taille M&#10;et 1 survêtement noir XL&#10;&#10;Livraison : Marie Dupont&#10;12 rue de la Paix, 75001 Paris&#10;06 12 34 56 78"></textarea>
-
       <div class="dz" id="dz">
         <input type="file" id="fi" accept="image/*" multiple onchange="addFiles(this.files)"/>
         <div class="ic">📸</div>
         <p>Glissez les <span>captures du site</span> ici<br>ou cliquez pour sélectionner</p>
       </div>
-
       <div class="pvs" id="pv"></div>
-
-      <div class="ldr" id="ld">
-        <div class="spin"></div>
-        <span id="lm">Analyse...</span>
-      </div>
-
+      <div class="ldr" id="ld"><div class="spin"></div><span id="lm">Analyse...</span></div>
       <button class="bgo" id="bg" onclick="go()">Analyser la commande →</button>
     </div>
   </div>
 
-  <!-- DROITE : résultats -->
   <div class="right">
     <div class="tabs">
       <div class="tab on" id="t1" onclick="stab('list')">📦 Liste produits</div>
@@ -148,18 +123,19 @@ textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)
       <div class="empty" id="em"><div class="ei">💬</div><p>Le message apparaîtra ici<br>après analyse</p></div>
       <div id="mc" style="display:none">
         <div class="wabox" id="wo"></div>
-        <button class="bcp" onclick="cp()">📋 Copier le message</button>
+        <div class="btns">
+          <button class="bcp" onclick="cp()">📋 Copier le message</button>
+          <button class="bemail" onclick="sendEmail()">✉️ Envoyer par email</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ── État global ───────────────────────────────────────────────────────────────
-let photos = [];
-let lastMsg = '';
+let photos = [], lastMsg = '', lastResult = null;
 
-// ── Clé API ───────────────────────────────────────────────────────────────────
+// ── Clé API ───────────────────────────────────────────────────────
 function onKey() {
   const k = document.getElementById('ki').value.trim();
   localStorage.setItem('dp_k', k);
@@ -171,13 +147,15 @@ window.addEventListener('load', () => {
 });
 function key() { return (document.getElementById('ki').value || localStorage.getItem('dp_k') || '').trim(); }
 
-// ── Tabs ──────────────────────────────────────────────────────────────────────
+// ── Tabs ──────────────────────────────────────────────────────────
 function stab(t) {
-  ['t1','t2'].forEach((id,i) => document.getElementById(id).className = 'tab' + (t===['list','msg'][i]?' on':''));
-  ['vl','vm'].forEach((id,i) => document.getElementById(id).className = 'tv' + (t===['list','msg'][i]?' on':''));
+  document.getElementById('t1').className = 'tab' + (t === 'list' ? ' on' : '');
+  document.getElementById('t2').className = 'tab' + (t === 'msg' ? ' on' : '');
+  document.getElementById('vl').className = 'tv' + (t === 'list' ? ' on' : '');
+  document.getElementById('vm').className = 'tv' + (t === 'msg' ? ' on' : '');
 }
 
-// ── Photos ────────────────────────────────────────────────────────────────────
+// ── Photos ────────────────────────────────────────────────────────
 const dze = document.getElementById('dz');
 dze.addEventListener('dragover', e => { e.preventDefault(); dze.classList.add('drag'); });
 dze.addEventListener('dragleave', () => dze.classList.remove('drag'));
@@ -189,7 +167,6 @@ function addFiles(files) {
     compress(f).then(p => { photos.push(p); rp(); });
   }
 }
-
 function compress(file) {
   return new Promise(res => {
     const img = new Image(), url = URL.createObjectURL(file);
@@ -197,8 +174,8 @@ function compress(file) {
       URL.revokeObjectURL(url);
       const M = 800;
       let w = img.width, h = img.height;
-      if (w > M) { h = Math.round(h*M/w); w = M; }
-      if (h > M) { w = Math.round(w*M/h); h = M; }
+      if (w > M) { h = Math.round(h * M / w); w = M; }
+      if (h > M) { w = Math.round(w * M / h); h = M; }
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
@@ -207,7 +184,6 @@ function compress(file) {
     img.src = url;
   });
 }
-
 function rp() {
   const el = document.getElementById('pv');
   el.innerHTML = '';
@@ -220,13 +196,13 @@ function rp() {
 }
 function del(i) { photos.splice(i, 1); rp(); }
 
-// ── Loader ────────────────────────────────────────────────────────────────────
+// ── Loader ────────────────────────────────────────────────────────
 function setL(on, msg) {
   document.getElementById('ld').className = 'ldr' + (on ? ' on' : '');
   if (msg) document.getElementById('lm').textContent = msg;
 }
 
-// ── Analyse principale ────────────────────────────────────────────────────────
+// ── Analyse ───────────────────────────────────────────────────────
 async function go() {
   const k = key();
   if (!k.startsWith('sk-ant-')) { alert('Entrez votre clé API Anthropic en haut à droite'); return; }
@@ -239,12 +215,13 @@ async function go() {
   show('el', false); show('lc', false);
   show('em', false); show('mc', false);
   document.getElementById('eb').innerHTML = '';
+  lastResult = null;
 
   try {
-    // Étape 1 : identifier les produits des photos (appel direct Anthropic — images)
+    // Étape 1 : identifier les produits des photos
     const photoNames = [];
     for (let i = 0; i < photos.length; i++) {
-      setL(true, `Analyse photo ${i+1}/${photos.length}...`);
+      setL(true, `Analyse photo ${i + 1}/${photos.length}...`);
       try {
         const r = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
@@ -255,8 +232,7 @@ async function go() {
             'anthropic-dangerous-direct-browser-access': 'true'
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-5',
-            max_tokens: 100,
+            model: 'claude-sonnet-4-5', max_tokens: 100,
             messages: [{ role: 'user', content: [
               { type: 'image', source: { type: 'base64', media_type: photos[i].type, data: photos[i].data } },
               { type: 'text', text: "Capture du site doretdeplatineshop.com. Lis uniquement le nom exact du produit dans le fil de navigation ou le titre. Réponds avec juste le nom, rien d'autre." }
@@ -271,7 +247,7 @@ async function go() {
       } catch(e) { console.warn('Photo err:', e); }
     }
 
-    // Étape 2 : tout envoyer à la fonction Netlify (Claude + Airtable côté serveur)
+    // Étape 2 : analyse complète via fonction Netlify (Claude + Airtable)
     setL(true, 'Recherche des produits et références Believe...');
     const resp = await fetch('/api/analyse', {
       method: 'POST',
@@ -281,11 +257,11 @@ async function go() {
 
     const raw = await resp.text();
     let json;
-    try { json = JSON.parse(raw); } catch(e) { throw new Error('Réponse invalide: ' + raw.substring(0, 200)); }
-
+    try { json = JSON.parse(raw); } catch(e) { throw new Error('Réponse invalide : ' + raw.substring(0, 200)); }
     if (!resp.ok) throw new Error(json.error || 'Erreur ' + resp.status);
 
     lastMsg = json.message_whatsapp || '';
+    lastResult = json;
     render(json);
 
   } catch(e) {
@@ -297,7 +273,7 @@ async function go() {
   }
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────
 function render(j) {
   const ps = j.products || [];
   let rows = '';
@@ -308,17 +284,17 @@ function render(j) {
     const ref = p.reference_believe && p.reference_believe !== 'N/A'
       ? `<span class="ref">${esc(p.reference_believe)}</span>`
       : '<span style="color:var(--muted)">—</span>';
-    rows += `<tr><td>${esc(p.nom_propre||p.nom_original)}${src}</td><td>${ref}</td><td>${p.quantite||'—'}</td><td>${esc(p.taille||'—')}</td><td><span class="badge ${bc}">${bl}</span></td></tr>`;
+    rows += `<tr><td>${esc(p.nom_propre || p.nom_original)}${src}</td><td>${ref}</td><td>${p.quantite || '—'}</td><td>${esc(p.taille || '—')}</td><td><span class="badge ${bc}">${bl}</span></td></tr>`;
   }
   document.getElementById('pb').innerHTML = rows;
 
   const d = j.destinataire || {};
-  document.getElementById('ad').innerHTML = (d.nom||d.adresse||d.telephone)
-    ? `<div class="acard"><div class="albl">📍 Livraison</div><p><strong>${esc(d.nom||'—')}</strong><br>${esc(d.adresse||'—')}<br>${esc(d.telephone||'—')}</p></div>`
+  document.getElementById('ad').innerHTML = (d.nom || d.adresse || d.telephone)
+    ? `<div class="acard"><div class="albl">📍 Livraison</div><p><strong>${esc(d.nom || '—')}</strong><br>${esc(d.adresse || '—')}<br>${esc(d.telephone || '—')}</p></div>`
     : '';
 
-  document.getElementById('al').innerHTML = (j.alertes||[])
-    .map(a => `<div class="alert ${a.type==='error'?'aerr':'awarn'}">⚠️ ${esc(a.message)}</div>`)
+  document.getElementById('al').innerHTML = (j.alertes || [])
+    .map(a => `<div class="alert ${a.type === 'error' ? 'aerr' : 'awarn'}">⚠️ ${esc(a.message)}</div>`)
     .join('');
 
   show('el', false); show('lc', true);
@@ -329,7 +305,48 @@ function render(j) {
   }
 }
 
-// ── Utils ─────────────────────────────────────────────────────────────────────
+// ── Email ─────────────────────────────────────────────────────────
+function buildEmailBody(j) {
+  const ps = j.products || [];
+  const d = j.destinataire || {};
+  const date = new Date().toLocaleDateString('fr-FR');
+
+  let body = `COMMANDE D'OR ET DE PLATINE — ${date}\n`;
+  body += `════════════════════════════════\n\n`;
+  body += `PRODUITS\n`;
+  body += `────────────────────────────────\n`;
+  ps.forEach((p, i) => {
+    body += `${i + 1}. ${p.nom_propre || p.nom_original}\n`;
+    body += `   Réf Believe : ${p.reference_believe && p.reference_believe !== 'N/A' ? p.reference_believe : 'À compléter'}\n`;
+    body += `   Quantité    : ${p.quantite || '—'}\n`;
+    body += `   Taille      : ${p.taille || '—'}\n\n`;
+  });
+
+  body += `LIVRAISON\n`;
+  body += `────────────────────────────────\n`;
+  body += `Nom       : ${d.nom || '—'}\n`;
+  body += `Adresse   : ${d.adresse || '—'}\n`;
+  body += `Téléphone : ${d.telephone || '—'}\n`;
+
+  const alertes = (j.alertes || []);
+  if (alertes.length > 0) {
+    body += `\nINFORMATIONS MANQUANTES\n`;
+    body += `────────────────────────────────\n`;
+    alertes.forEach(a => { body += `⚠ ${a.message}\n`; });
+  }
+
+  return body;
+}
+
+function sendEmail() {
+  if (!lastResult) { alert("Analysez d'abord une commande"); return; }
+  const dest = lastResult.destinataire || {};
+  const subject = encodeURIComponent(`Commande D'or et de Platine — ${dest.nom || 'Client'}`);
+  const body = encodeURIComponent(buildEmailBody(lastResult));
+  window.open(`mailto:?subject=${subject}&body=${body}`);
+}
+
+// ── Utils ─────────────────────────────────────────────────────────
 function show(id, v) { document.getElementById(id).style.display = v ? 'block' : 'none'; }
 function cp() {
   if (!lastMsg) return;
@@ -339,7 +356,7 @@ function cp() {
     setTimeout(() => b.textContent = '📋 Copier le message', 2000);
   });
 }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 </script>
 </body>
 </html>
