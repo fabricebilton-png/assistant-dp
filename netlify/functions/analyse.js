@@ -3,9 +3,8 @@ const https = require('https');
 const AIRTABLE_TOKEN = 'pataBCeGvhlN3N4Uq.cfa8a096a4b28fac19de4ea8006778cc5822fa610b9a2615cc144a4290e6a185';
 const AIRTABLE_BASE  = 'appouax19tnHJj0TD';
 const AIRTABLE_TABLE = 'tblGrm2yPn0ldTi01';
-const F_REF     = 'fld02IfEMQb0zorrD';
-const F_DESIGN  = 'fldba0MGx8lL3TQWS';
-const F_CAT     = 'fldayu3Yn6iraIcns';
+const F_REF    = 'fld02IfEMQb0zorrD';
+const F_DESIGN = 'fldba0MGx8lL3TQWS';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -57,45 +56,41 @@ function airtableGet(path) {
   });
 }
 
-// Recherche Airtable par mots-clés + catégorie optionnelle
-async function findRef(designation, categorie) {
+// Recherche via l'endpoint /search d'Airtable (full-text, fuzzy, comme search_records)
+// puis récupère les valeurs via /records?records[]=
+async function findRef(designation) {
   try {
-    const mots = designation.split(/[\s\-–]+/).filter(w => w.length > 3).slice(0, 3);
-    if (mots.length === 0) return null;
+    // Extraire les mots significatifs (>3 lettres), ignorer les mots génériques
+    const stopwords = ['maillot','casquette','sweat','short','pantalon','veste','tshirt','shirt','pack','coque'];
+    const words = designation.split(/[\s\-–—_]+/)
+      .filter(w => w.length > 3)
+      .filter(w => !stopwords.includes(w.toLowerCase()));
 
-    const searchConds = mots.map(m =>
-      `SEARCH("${m.toLowerCase().replace(/"/g, '')}", LOWER({${F_DESIGN}}))`
-    );
-    let formula = mots.length > 1 ? `OR(${searchConds.join(', ')})` : searchConds[0];
+    // Si tous les mots sont des stopwords, prendre quand même les 2 premiers
+    const keywords = words.length > 0 ? words : designation.split(/[\s\-–—_]+/).filter(w => w.length > 2);
 
-    // Ajouter filtre catégorie si dispo
-    if (categorie) {
-      formula = `AND({${F_CAT}}="${categorie}", ${formula})`;
-    }
+    // Chercher avec les mots les plus discriminants (les plus longs)
+    const searchQuery = keywords.sort((a,b) => b.length - a.length).slice(0, 2).join(' ');
+    if (!searchQuery) return null;
 
-    const qs = new URLSearchParams({ filterByFormula: formula, maxRecords: '5' });
-    qs.append('fields[]', F_DESIGN);
-    qs.append('fields[]', F_REF);
-    qs.append('fields[]', F_CAT);
+    // Étape 1 : search (full-text fuzzy)
+    const searchPath = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}/search`
+      + `?query=${encodeURIComponent(searchQuery)}`
+      + `&fields[]=${F_DESIGN}&fields[]=${F_REF}`;
 
-    const res = await airtableGet(`/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}?${qs.toString()}`);
+    const searchRes = await airtableGet(searchPath);
+    if (!searchRes.records || searchRes.records.length === 0) return null;
 
-    if (!res.records || res.records.length === 0) {
-      // Fallback sans catégorie
-      if (categorie) return findRef(designation, null);
-      return null;
-    }
+    // Étape 2 : récupérer les valeurs du premier record
+    const recordId = searchRes.records[0].id;
+    const getPath = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
+      + `?records[]=${recordId}&fields[]=${F_DESIGN}&fields[]=${F_REF}`;
 
-    // Meilleur match : produit avec le plus de mots en commun
-    const desigLower = designation.toLowerCase();
-    let best = res.records[0], bestScore = 0;
-    for (const r of res.records) {
-      const nom = (r.fields[F_DESIGN] || '').toLowerCase();
-      const score = mots.filter(m => nom.includes(m.toLowerCase())).length;
-      if (score > bestScore) { best = r; bestScore = score; }
-    }
+    const getRes = await airtableGet(getPath);
+    if (!getRes.records || getRes.records.length === 0) return null;
 
-    return best.fields[F_REF] || null;
+    const fields = getRes.records[0].cellValuesByFieldId || {};
+    return fields[F_REF] || null;
   } catch(e) {
     console.error('findRef error:', e.message);
     return null;
@@ -117,26 +112,22 @@ exports.handler = async function(event) {
   const { message, photoNames = [] } = body;
   if (!message) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Message manquant' }) };
 
-  // Construire le contexte photos pour le prompt
   const photosCtx = photoNames.length > 0
     ? '\n\nProduits identifiés depuis les captures d\'écran du site doretdeplatineshop.com :\n'
       + photoNames.map((n, i) => `- Photo ${i+1}: ${n}`).join('\n')
-      + '\nCes produits sont à inclure dans la commande.'
+      + '\nCes produits sont à inclure dans la commande avec source "photo".'
     : '';
 
-  // ── Étape 1 : Claude analyse message + produits photos ───────────
-  const step1 = `Tu es un assistant pour D'or et de Platine. Analyse ce message WhatsApp et identifie tous les produits commandés.
-Les produits peuvent venir du texte du message ET des captures d'écran jointes.${photosCtx}
+  // ── Étape 1 : Claude analyse le message + photos ─────────────────
+  const step1 = `Tu es un assistant pour D'or et de Platine. Analyse ce message WhatsApp et identifie TOUS les produits commandés (texte ET photos).${photosCtx}
 
-Règles adresse: CP seul→déduis ville (13012=Marseille 12e, 75001=Paris 1er, 69001=Lyon 1er, 33000=Bordeaux, 06000=Nice, 31000=Toulouse, 59000=Lille, 44000=Nantes, 76000=Rouen, 67000=Strasbourg).
-Règles alertes: adresse incomplète (manque rue/CP/ville/téléphone), quantité manquante, taille manquante (textile).
-
-Pour chaque produit, extrais la catégorie parmi: T-shirt, Casquette, Sweat, Survêtement, Short, Pantalon, Veste, Claquette, Accessoire, Vinyle, CD, USB, Pack, Ballon, Chevalière, Coque téléphone, Maillot, Cagoule.
+Règles adresse: CP seul→déduis ville (13012=Marseille 12e,75001=Paris 1er,69001=Lyon 1er,33000=Bordeaux,06000=Nice,31000=Toulouse,59000=Lille,44000=Nantes,76000=Rouen,67000=Strasbourg,13100=Aix-en-Provence).
+Alertes: adresse incomplète (rue/CP/ville/téléphone manquant), quantité manquante, taille manquante (textile).
 
 JSON UNIQUEMENT sans markdown:
-{"products":[{"nom_original":"texte brut ou nom photo","nom_propre":"nom exact tel qu'affiché sur le site","categorie":"catégorie ou null","quantite":1,"taille":"taille ou N/A","source":"texte ou photo"}],"destinataire":{"nom":"","adresse":"","telephone":""},"alertes":[{"type":"warning","message":""}]}
+{"products":[{"nom_original":"texte brut ou nom photo","nom_propre":"nom tel qu'affiché sur le site doretdeplatineshop.com","quantite":1,"taille":"taille ou N/A","source":"texte ou photo"}],"destinataire":{"nom":"","adresse":"","telephone":""},"alertes":[{"type":"warning","message":""}]}
 
-Message WhatsApp: ${message}`;
+Message: ${message}`;
 
   let result;
   try {
@@ -152,19 +143,19 @@ Message WhatsApp: ${message}`;
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
   }
 
-  // ── Étape 2 : Enrichir refs Believe via Airtable REST ────────────
+  // ── Étape 2 : Recherche refs via Airtable full-text search ───────
   if (result.products) {
     for (const p of result.products) {
       const nom = (p.nom_propre || p.nom_original || '').trim();
       p.reference_believe = 'N/A';
       p.statut = 'introuvable';
       if (!nom) continue;
-      const ref = await findRef(nom, p.categorie || null);
+      const ref = await findRef(nom);
       if (ref) { p.reference_believe = ref; p.statut = 'trouve'; }
     }
   }
 
-  // ── Étape 3 : Message WhatsApp formaté ───────────────────────────
+  // ── Étape 3 : Message WhatsApp ───────────────────────────────────
   const d = result.destinataire || {};
   const prodLines = (result.products || []).map(p =>
     `- ${p.nom_propre||p.nom_original} | Réf: ${p.reference_believe} | Qté: ${p.quantite||'?'} | Taille: ${p.taille||'?'}`
@@ -175,10 +166,10 @@ Message WhatsApp: ${message}`;
     const r = await claudeCall(apiKey, {
       model: 'claude-sonnet-4-5',
       max_tokens: 600,
-      messages: [{ role: 'user', content: `Génère un message WhatsApp de confirmation commande D'or et de Platine. Tutoiement, *gras*, emojis, ━━━.
+      messages: [{ role: 'user', content: `Génère un message WhatsApp de confirmation commande D'or et de Platine. Tutoiement, *gras*, emojis, séparateurs ━━━.
 Produits:\n${prodLines}
 Livraison: ${d.nom||'?'}, ${d.adresse||'?'}, ${d.telephone||'?'}
-${alertes ? 'Infos manquantes à signaler:\n' + alertes : ''}
+${alertes ? 'Infos manquantes:\n' + alertes : ''}
 Retourne UNIQUEMENT le message WhatsApp.` }]
     });
     if (r.status === 200) {
