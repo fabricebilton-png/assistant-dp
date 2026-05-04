@@ -6,482 +6,265 @@
 <title>Assistant Commandes — D'or et de Platine</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --gold: #C9A84C; --gold-light: #E8C97A; --black: #0A0A0A; --dark: #141414;
-    --panel: #1C1C1C; --border: #2A2A2A; --text: #F0EDE8; --muted: #888;
-    --green: #2ECC71; --orange: #F39C12; --red: #E74C3C; --radius: 10px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--black); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; font-size: 14px; }
-  .header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--dark); }
-  .logo { width: 36px; height: 36px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--black); flex-shrink: 0; }
-  .header-text h1 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: .02em; }
-  .header-text p { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .api-config { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .api-input { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; width: 220px; outline: none; }
-  .api-input:focus { border-color: var(--gold); }
-  .api-input::placeholder { color: var(--muted); }
-  .api-status { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .api-status.ok { background: var(--green); }
-  .layout { display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 61px); }
-  .left-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-  .panel-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; }
-  .input-area { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
-  textarea#waMessage { width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; line-height: 1.65; resize: none; flex: 1; min-height: 180px; outline: none; transition: border-color .2s; }
-  textarea#waMessage:focus { border-color: var(--gold); }
-  textarea#waMessage::placeholder { color: var(--muted); }
-  .photo-drop { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 16px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
-  .photo-drop:hover, .photo-drop.drag { border-color: var(--gold); background: rgba(201,168,76,.05); }
-  .photo-drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .photo-drop-icon { font-size: 22px; margin-bottom: 6px; }
-  .photo-drop p { font-size: 12px; color: var(--muted); }
-  .photo-drop span { color: var(--gold); font-weight: 600; }
-  .photo-previews { display: flex; flex-wrap: wrap; gap: 8px; }
-  .photo-thumb { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); }
-  .photo-thumb-wrap { position: relative; display: inline-block; }
-  .remove-photo { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border: none; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .btn-analyze { width: 100%; padding: 13px; background: var(--gold); color: var(--black); border: none; border-radius: var(--radius); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s; letter-spacing: .03em; }
-  .btn-analyze:hover { opacity: .88; }
-  .btn-analyze:active { transform: scale(.98); }
-  .btn-analyze:disabled { opacity: .4; cursor: not-allowed; }
-  .right-panel { display: flex; flex-direction: column; overflow: hidden; }
-  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--dark); }
-  .tab { padding: 13px 20px; font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-transform: uppercase; letter-spacing: .07em; transition: color .15s, border-color .15s; }
-  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-  .tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
-  .tab-content.active { display: block; }
-  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 200px; gap: 10px; color: var(--muted); text-align: center; }
-  .empty-state .icon { font-size: 32px; opacity: .4; }
-  .empty-state p { font-size: 13px; }
-  .product-table { width: 100%; border-collapse: collapse; }
-  .product-table th { text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .06em; }
-  .product-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.45; font-size: 13px; }
-  .product-table tr:last-child td { border-bottom: none; }
-  .ref-code { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); background: rgba(201,168,76,.1); padding: 2px 6px; border-radius: 4px; }
-  .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: .04em; }
-  .badge-ok { background: rgba(46,204,113,.15); color: #2ECC71; }
-  .badge-warn { background: rgba(243,156,18,.15); color: #F39C12; }
-  .badge-err { background: rgba(231,76,60,.15); color: #E74C3C; }
-  .addr-block { margin-top: 20px; padding: 14px 16px; background: var(--panel); border-radius: var(--radius); border: 1px solid var(--border); }
-  .addr-label { font-size: 10px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
-  .addr-block p { font-size: 13px; line-height: 1.7; color: var(--text); }
-  .alerts { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-  .alert { padding: 10px 14px; border-radius: 8px; font-size: 12px; line-height: 1.5; border-left: 3px solid; }
-  .alert-warn { background: rgba(243,156,18,.1); border-color: var(--orange); color: #F5C053; }
-  .alert-err { background: rgba(231,76,60,.1); border-color: var(--red); color: #EC8076; }
-  .wa-msg-box { background: var(--panel); border-radius: var(--radius); border-left: 3px solid #25D366; padding: 16px 18px; font-size: 13px; line-height: 1.75; color: var(--text); white-space: pre-wrap; word-break: break-word; font-family: 'DM Mono', monospace; margin-bottom: 14px; }
-  .btn-copy { padding: 10px 24px; background: #25D366; color: white; border: none; border-radius: var(--radius); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
-  .btn-copy:hover { opacity: .85; }
-  .loader { display: none; align-items: center; gap: 10px; padding: 14px 0; color: var(--muted); font-size: 13px; }
-  .loader.show { display: flex; }
-  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error-msg { background: rgba(231,76,60,.1); border: 1px solid rgba(231,76,60,.3); border-radius: var(--radius); padding: 12px 16px; font-size: 13px; color: #EC8076; margin-bottom: 12px; }
-  @media (max-width: 700px) { .layout { grid-template-columns: 1fr; height: auto; } .left-panel { border-right: none; border-bottom: 1px solid var(--border); } .api-config { display: none; } }
+:root{--gold:#C9A84C;--black:#0A0A0A;--dark:#141414;--panel:#1C1C1C;--border:#2A2A2A;--text:#F0EDE8;--muted:#888;--green:#2ECC71;--orange:#F39C12;--red:#E74C3C;--radius:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;font-size:14px}
+.header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--dark)}
+.logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--black);flex-shrink:0}
+.ht h1{font-size:15px;font-weight:600}.ht p{font-size:12px;color:var(--muted);margin-top:2px}
+.ka{margin-left:auto;display:flex;align-items:center;gap:8px}
+.kdot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.kdot.ok{background:var(--green)}
+.kinput{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;width:260px;outline:none}
+.kinput:focus{border-color:var(--gold)}.kinput::placeholder{color:var(--muted)}
+.layout{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 61px)}
+.left{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.right{display:flex;flex-direction:column;overflow:hidden}
+.ptitle{padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.1em}
+.iwrap{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+textarea{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;line-height:1.65;resize:none;flex:1;min-height:160px;outline:none;transition:border-color .2s}
+textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)}
+.dz{border:1.5px dashed var(--border);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s}
+.dz:hover,.dz.drag{border-color:var(--gold);background:rgba(201,168,76,.05)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz .ic{font-size:20px;margin-bottom:4px}.dz p{font-size:12px;color:var(--muted)}.dz span{color:var(--gold);font-weight:600}
+.prevs{display:flex;flex-wrap:wrap;gap:8px}
+.tw{position:relative;display:inline-block}
+.th{width:60px;height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border)}
+.rb{position:absolute;top:-5px;right:-5px;background:var(--red);color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.loader{display:none;align-items:center;gap:10px;padding:8px 0;font-size:13px;color:var(--muted)}
+.loader.show{display:flex}
+.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-go{width:100%;padding:12px;background:var(--gold);color:var(--black);border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:opacity .15s}
+.btn-go:hover{opacity:.85}.btn-go:disabled{opacity:.4;cursor:not-allowed}
+.tabs{display:flex;background:var(--dark);border-bottom:1px solid var(--border)}
+.tab{padding:12px 20px;font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.07em;transition:color .15s,border-color .15s}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tv{flex:1;overflow-y:auto;padding:20px;display:none}.tv.on{display:block}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:10px;color:var(--muted);text-align:center}
+.empty .ei{font-size:30px;opacity:.35}.empty p{font-size:13px}
+.pt{width:100%;border-collapse:collapse;font-size:12.5px}
+.pt th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
+.pt td{padding:9px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;line-height:1.4}
+.pt tr:last-child td{border-bottom:none}
+.ref{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);background:rgba(201,168,76,.1);padding:2px 6px;border-radius:4px;white-space:nowrap}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em}
+.bok{background:rgba(46,204,113,.15);color:#2ECC71}.bwarn{background:rgba(243,156,18,.15);color:#F39C12}.berr{background:rgba(231,76,60,.15);color:#E74C3C}
+.acard{margin-top:14px;background:var(--panel);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px}
+.albl{font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.acard p{font-size:13px;line-height:1.7}
+.alerts{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.alert{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5;border-left:3px solid}
+.awarn{background:rgba(243,156,18,.1);border-color:var(--orange);color:#F5C053}
+.aerr{background:rgba(231,76,60,.1);border-color:var(--red);color:#EC8076}
+.wabox{background:var(--panel);border-left:3px solid #25D366;border-radius:var(--radius);padding:16px 18px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word;font-family:'DM Mono',monospace;margin-bottom:12px}
+.bcopy{padding:10px 24px;background:#25D366;color:white;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.bcopy:hover{opacity:.85}
+.ebox{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:#EC8076;margin-bottom:12px;line-height:1.5;word-break:break-all}
+@media(max-width:640px){.layout{grid-template-columns:1fr;height:auto}.left{border-right:none;border-bottom:1px solid var(--border)}.ka{display:none}}
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="logo">D&P</div>
-  <div class="header-text">
-    <h1>Assistant Commandes WhatsApp</h1>
-    <p>D'or et de Platine — Analyse & Confirmation</p>
-  </div>
-  <div class="api-config">
-    <div class="api-status" id="apiStatus"></div>
-    <input class="api-input" type="password" id="apiKey" placeholder="Clé API Anthropic" oninput="saveKey()" />
+  <div class="ht"><h1>Assistant Commandes WhatsApp</h1><p>D'or et de Platine — Analyse & Confirmation</p></div>
+  <div class="ka">
+    <div class="kdot" id="kd"></div>
+    <input class="kinput" type="password" id="ki" placeholder="Clé API Anthropic sk-ant-..." oninput="onKey()"/>
   </div>
 </div>
 
 <div class="layout">
-  <div class="left-panel">
-    <div class="panel-header">📱 Message WhatsApp reçu</div>
-    <div class="input-area">
-      <textarea id="waMessage" rows="10" placeholder="Collez ici le message WhatsApp reçu...
-
-Exemple :
-Bonjour, je veux commander :
-- 2 casquettes D&P Club
-- 1 survêtement taille M
-- T-shirt Essence en L
-
-Livraison :
-Mohamed Dupont
-12 rue de la Paix, 75001 Paris
-06 12 34 56 78"></textarea>
-
-      <div class="photo-drop" id="dropZone">
-        <input type="file" id="photoInput" accept="image/*" multiple onchange="handleFiles(this.files)" />
-        <div class="photo-drop-icon">📸</div>
+  <div class="left">
+    <div class="ptitle">📱 Message WhatsApp reçu</div>
+    <div class="iwrap">
+      <textarea id="mi" rows="10" placeholder="Collez ici le message WhatsApp reçu...&#10;&#10;Exemple :&#10;Je voudrais 2 casquettes D&P Club taille M&#10;et 1 survêtement noir XL&#10;&#10;Livraison : Marie Dupont&#10;12 rue de la Paix, 75001 Paris&#10;06 12 34 56 78"></textarea>
+      <div class="dz" id="dz">
+        <input type="file" id="fi" accept="image/*" multiple onchange="addF(this.files)"/>
+        <div class="ic">📸</div>
         <p>Glissez les <span>captures du site</span> ici<br>ou cliquez pour sélectionner</p>
       </div>
-
-      <div class="photo-previews" id="photoPreviews"></div>
-
-      <div class="loader" id="loader">
-        <div class="spinner"></div>
-        <span id="loaderText">Analyse en cours...</span>
-      </div>
-
-      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">Analyser la commande →</button>
+      <div class="prevs" id="pv"></div>
+      <div class="loader" id="ld"><div class="spin"></div><span id="lm">Analyse...</span></div>
+      <button class="btn-go" id="bg" onclick="go()">Analyser la commande →</button>
     </div>
   </div>
 
-  <div class="right-panel">
+  <div class="right">
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('list')" id="tab-list">📦 Liste produits</div>
-      <div class="tab" onclick="switchTab('msg')" id="tab-msg">💬 Message WhatsApp</div>
+      <div class="tab on" id="t1" onclick="tab('list')">📦 Liste produits</div>
+      <div class="tab" id="t2" onclick="tab('msg')">💬 Message WhatsApp</div>
     </div>
-    <div class="tab-content active" id="view-list">
-      <div class="empty-state" id="emptyList">
-        <div class="icon">📋</div>
-        <p>La liste des produits<br>apparaîtra ici après analyse</p>
-      </div>
-      <div id="listContent" style="display:none">
-        <div id="errorMsg"></div>
-        <table class="product-table" id="productTable">
-          <thead><tr><th>Produit</th><th>Réf Believe</th><th>Qté</th><th>Taille</th><th></th></tr></thead>
-          <tbody id="productBody"></tbody>
-        </table>
-        <div id="addrBlock"></div>
-        <div class="alerts" id="alertsBlock"></div>
+    <div class="tv on" id="vl">
+      <div class="empty" id="el"><div class="ei">📋</div><p>La liste apparaîtra ici<br>après analyse</p></div>
+      <div id="lc" style="display:none">
+        <div id="eb"></div>
+        <table class="pt"><thead><tr><th>Produit</th><th>Réf Believe</th><th>Qté</th><th>Taille</th><th></th></tr></thead><tbody id="pb"></tbody></table>
+        <div id="ad"></div><div class="alerts" id="al"></div>
       </div>
     </div>
-    <div class="tab-content" id="view-msg">
-      <div class="empty-state" id="emptyMsg">
-        <div class="icon">💬</div>
-        <p>Le message de confirmation<br>apparaîtra ici après analyse</p>
-      </div>
-      <div id="msgContent" style="display:none">
-        <div class="wa-msg-box" id="waOutput"></div>
-        <button class="btn-copy" onclick="copyMsg()">📋 Copier le message</button>
-      </div>
+    <div class="tv" id="vm">
+      <div class="empty" id="em"><div class="ei">💬</div><p>Le message apparaîtra ici<br>après analyse</p></div>
+      <div id="mc" style="display:none"><div class="wabox" id="wo"></div><button class="bcopy" onclick="cp()">📋 Copier le message</button></div>
     </div>
   </div>
 </div>
 
 <script>
-const CP_VILLES = {
-  '75001':'Paris 1er','75002':'Paris 2e','75003':'Paris 3e','75004':'Paris 4e',
-  '75005':'Paris 5e','75006':'Paris 6e','75007':'Paris 7e','75008':'Paris 8e',
-  '75009':'Paris 9e','75010':'Paris 10e','75011':'Paris 11e','75012':'Paris 12e',
-  '75013':'Paris 13e','75014':'Paris 14e','75015':'Paris 15e','75016':'Paris 16e',
-  '75017':'Paris 17e','75018':'Paris 18e','75019':'Paris 19e','75020':'Paris 20e',
-  '13001':'Marseille 1er','13002':'Marseille 2e','13003':'Marseille 3e',
-  '13004':'Marseille 4e','13005':'Marseille 5e','13006':'Marseille 6e',
-  '13007':'Marseille 7e','13008':'Marseille 8e','13009':'Marseille 9e',
-  '13010':'Marseille 10e','13011':'Marseille 11e','13012':'Marseille 12e',
-  '13013':'Marseille 13e','13014':'Marseille 14e','13015':'Marseille 15e',
-  '13016':'Marseille 16e','69001':'Lyon 1er','69002':'Lyon 2e','69003':'Lyon 3e',
-  '69004':'Lyon 4e','69005':'Lyon 5e','69006':'Lyon 6e','69007':'Lyon 7e',
-  '69008':'Lyon 8e','69009':'Lyon 9e','33000':'Bordeaux','06000':'Nice',
-  '31000':'Toulouse','59000':'Lille','67000':'Strasbourg','44000':'Nantes',
-  '34000':'Montpellier','76000':'Rouen','13100':'Aix-en-Provence'
-};
+let photos=[],lastMsg='';
 
-const API_KEY = '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';
-let photos = [];
-let lastResult = null;
+// Clé API
+function onKey(){const k=document.getElementById('ki').value.trim();localStorage.setItem('dp_k',k);document.getElementById('kd').className='kdot'+(k.startsWith('sk-ant-')?' ok':'');}
+window.addEventListener('load',()=>{const s=localStorage.getItem('dp_k')||'';if(s){document.getElementById('ki').value=s;document.getElementById('kd').className='kdot'+(s.startsWith('sk-ant-')?' ok':'');}});
+function key(){return(document.getElementById('ki').value||localStorage.getItem('dp_k')||'').trim();}
 
-window.addEventListener('load', () => {
-  document.getElementById('apiKey').value = API_KEY;
-  document.getElementById('apiStatus').className = 'api-status ok';
-});
-
-function saveKey() {
-  const k = document.getElementById('apiKey').value.trim();
-  document.getElementById('apiStatus').className = k ? 'api-status ok' : 'api-status';
+// Tabs
+function tab(t){
+  document.getElementById('t1').className='tab'+(t==='list'?' on':'');
+  document.getElementById('t2').className='tab'+(t==='msg'?' on':'');
+  document.getElementById('vl').className='tv'+(t==='list'?' on':'');
+  document.getElementById('vm').className='tv'+(t==='msg'?' on':'');
 }
 
-function getKey() {
-  return document.getElementById('apiKey').value.trim() || API_KEY;
-}
+// Photos
+const dze=document.getElementById('dz');
+dze.addEventListener('dragover',e=>{e.preventDefault();dze.classList.add('drag');});
+dze.addEventListener('dragleave',()=>dze.classList.remove('drag'));
+dze.addEventListener('drop',e=>{e.preventDefault();dze.classList.remove('drag');addF(e.dataTransfer.files);});
+function addF(files){for(const f of files){if(!f.type.startsWith('image/'))continue;compress(f).then(p=>{photos.push(p);rp();});}}
+function compress(file){return new Promise(res=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);const M=800;let w=img.width,h=img.height;if(w>M){h=Math.round(h*M/w);w=M;}if(h>M){w=Math.round(w*M/h);h=M;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res({data:c.toDataURL('image/jpeg',.65).split(',')[1],type:'image/jpeg',name:file.name});};img.src=url;});}
+function rp(){const el=document.getElementById('pv');el.innerHTML='';photos.forEach((p,i)=>{const w=document.createElement('div');w.className='tw';w.innerHTML=`<img class="th" src="data:${p.type};base64,${p.data}"><button class="rb" onclick="rph(${i})">✕</button>`;el.appendChild(w);});}
+function rph(i){photos.splice(i,1);rp();}
 
-const dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+// Loader
+function setL(s,m){document.getElementById('ld').className='loader'+(s?' show':'');if(m)document.getElementById('lm').textContent=m;}
 
-function compressImage(file) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const MAX = 800;
-      let w = img.width, h = img.height;
-      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
-      if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
-      const data = dataUrl.split(',')[1];
-      const kb = Math.round(data.length * 0.75 / 1024);
-      console.log('Image compressée:', file.name, kb + 'kb');
-      resolve({ data, type: 'image/jpeg', name: file.name, kb });
-    };
-    img.src = url;
-  });
-}
+// Analyse
+async function go(){
+  const k=key();
+  if(!k.startsWith('sk-ant-')){alert('Entrez votre clé API Anthropic en haut à droite');return;}
+  const msg=document.getElementById('mi').value.trim();
+  if(!msg){alert('Collez un message WhatsApp');return;}
 
-function handleFiles(files) {
-  for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
-    compressImage(f).then(compressed => {
-      photos.push(compressed);
-      renderPreviews();
-    });
-  }
-}
-
-function renderPreviews() {
-  const container = document.getElementById('photoPreviews');
-  container.innerHTML = '';
-  photos.forEach((p, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'photo-thumb-wrap';
-    wrap.innerHTML = '<img class="photo-thumb" src="data:' + p.type + ';base64,' + p.data + '" title="' + p.name + ' (' + (p.kb||'?') + 'kb)"><button class="remove-photo" onclick="removePhoto(' + i + ')">✕</button>';
-    container.appendChild(wrap);
-  });
-}
-
-function removePhoto(i) { photos.splice(i, 1); renderPreviews(); }
-
-function switchTab(tab) {
-  document.getElementById('tab-list').className = 'tab' + (tab==='list' ? ' active' : '');
-  document.getElementById('tab-msg').className = 'tab' + (tab==='msg' ? ' active' : '');
-  document.getElementById('view-list').className = 'tab-content' + (tab==='list' ? ' active' : '');
-  document.getElementById('view-msg').className = 'tab-content' + (tab==='msg' ? ' active' : '');
-}
-
-function enrichAdresse(adresse) {
-  if (!adresse) return adresse;
-  const cpMatch = adresse.match(/\b(\d{5})\b/);
-  if (cpMatch) {
-    const cp = cpMatch[1];
-    const ville = CP_VILLES[cp];
-    if (ville && !adresse.toLowerCase().includes(ville.toLowerCase().split(' ')[0])) {
-      return adresse.replace(cp, cp + ' ' + ville);
-    }
-  }
-  return adresse;
-}
-
-
-// ── Recherche Airtable via proxy ─────────────────────────────────────
-async function searchAirtable(query) {
-  try {
-    const resp = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'airtable-search', query })
-    });
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    return data.records || [];
-  } catch(e) { console.error('Airtable search error:', e); return null; }
-}
-
-// Enrichit les produits avec les refs Airtable
-function enrichWithAirtable(products) {
-  for (const p of products) {
-    if (p.reference_believe && p.reference_believe !== 'N/A') continue;
-    const searchTerm = p.nom_propre || p.nom_original;
-    if (!searchTerm) continue;
-    const ref = findRefBelieve(searchTerm);
-    if (ref) {
-      p.reference_believe = ref;
-      p.statut = 'trouve';
-    }
-  }
-  return products;
-}
-
-async function analyze() {
-  const apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('anthropic_key');
-  if (!apiKey) { alert('Entrez votre clé API Anthropic dans le champ en haut à droite'); return; }
-  const msg = document.getElementById('waMessage').value.trim();
-  if (!msg) { alert('Collez un message WhatsApp à analyser'); return; }
-  const btn = document.getElementById('analyzeBtn');
-  btn.disabled = true;
-  document.getElementById('loader').className = 'loader show';
-  document.getElementById('loaderText').textContent = 'Analyse du message...';
-  document.getElementById('emptyList').style.display = 'none';
-  document.getElementById('listContent').style.display = 'none';
-  document.getElementById('emptyMsg').style.display = 'none';
-  document.getElementById('msgContent').style.display = 'none';
-  document.getElementById('errorMsg').innerHTML = '';
+  const btn=document.getElementById('bg');btn.disabled=true;
+  setL(true,'Analyse du message...');
+  document.getElementById('el').style.display='none';
+  document.getElementById('lc').style.display='none';
+  document.getElementById('em').style.display='none';
+  document.getElementById('mc').style.display='none';
+  document.getElementById('eb').innerHTML='';
 
   try {
-    // Étape 1 : identifier les produits des photos
-    // Les images sont envoyées DIRECTEMENT à l'API Anthropic (pas via le proxy)
-    // car les images base64 sont trop lourdes pour Netlify Functions
-    let photoProducts = [];
-    if (photos.length > 0) {
-      for (let i = 0; i < photos.length; i++) {
-        const p = photos[i];
-        document.getElementById('loaderText').textContent = 'Analyse photo ' + (i+1) + '/' + photos.length + '...';
-        try {
-          const pr = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-              'anthropic-version': '2023-06-01',
-              'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 200,
-              messages: [{ role: 'user', content: [
-                { type: 'image', source: { type: 'base64', media_type: p.type, data: p.data } },
-                { type: 'text', text: "Cette image est une capture du site doretdeplatineshop.com. Lis le fil de navigation ou le titre du produit et retourne UNIQUEMENT le nom exact du produit en une ligne, rien d'autre." }
-              ]}]
-            })
-          });
-          if (pr.ok) {
-            const pd = await pr.json();
-            const name = (pd.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
-            if (name) photoProducts.push(name);
-          } else {
-            const errTxt = await pr.text();
-            console.error('Photo API error:', pr.status, errTxt.substring(0,200));
-          }
-        } catch(e) { console.warn('Photo ' + (i+1) + ' échouée:', e.message); }
+    // Photos : appel direct Anthropic (images trop lourdes pour le proxy)
+    let pnames=[];
+    for(let i=0;i<photos.length;i++){
+      setL(true,`Analyse photo ${i+1}/${photos.length}...`);
+      try{
+        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:150,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photos[i].type,data:photos[i].data}},{type:'text',text:"Capture du site doretdeplatineshop.com. Lis le nom exact du produit dans le titre ou la navigation. Réponds uniquement avec le nom du produit."}]}]})});
+        if(r.ok){const d=await r.json();const n=(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();if(n)pnames.push(n);}
+      }catch(e){console.warn('photo err',e);}
+    }
+
+    // Analyse texte via proxy
+    setL(true,'Génération de la commande...');
+    const pc=pnames.length>0?'\n\nProduits depuis les captures :\n'+pnames.map((n,i)=>`- Photo ${i+1}: ${n}`).join('\n'):'';
+
+    const resp=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({apiKey:k,model:'claude-sonnet-4-5',max_tokens:4000,
+        messages:[{role:'user',content:[{type:'text',text:prompt(msg,pc)}]}]})});
+
+    const raw=await resp.text();
+    let api;try{api=JSON.parse(raw);}catch(e){throw new Error('Réponse serveur invalide: '+raw.substring(0,200));}
+    if(!resp.ok)throw new Error('Erreur '+resp.status+' — '+JSON.stringify(api));
+
+    const txt=(api.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    let json=parseJSON(txt);
+
+    // Enrichir refs Airtable
+    setL(true,'Recherche des références Believe...');
+    if(json.products){
+      for(const p of json.products){
+        if(p.reference_believe&&p.reference_believe!=='N/A')continue;
+        const nom=(p.nom_propre||p.nom_original||'').trim();
+        if(!nom)continue;
+        const ref=await searchAt(nom);
+        if(ref){p.reference_believe=ref;p.statut='trouve';}
       }
     }
 
-    // Étape 2 : analyser texte + produits photos identifiés
-    document.getElementById('loaderText').textContent = 'Génération de la commande...';
-    const resp = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: apiKey, model: 'claude-sonnet-4-5', max_tokens: 4000,
-        messages: [{ role: 'user', content: [{ type: 'text', text: buildPrompt(msg, photoProducts) }] }]
-      })
-    });
+    lastMsg=json.message_whatsapp||'';
+    render(json);
+  }catch(e){
+    document.getElementById('el').style.display='none';
+    document.getElementById('lc').style.display='block';
+    document.getElementById('eb').innerHTML=`<div class="ebox">⚠️ ${esc(e.message)}</div>`;
+  }finally{btn.disabled=false;setL(false);}
+}
 
-    if (!resp.ok) {
-      const rawErr = await resp.text();
-      throw new Error('Erreur ' + resp.status + ' — ' + rawErr.substring(0, 300));
-    }
+// Recherche Airtable via proxy
+async function searchAt(nom){
+  try{
+    const words=nom.replace(/[^\w\s\u00C0-\u024F]/g,' ').trim().split(/\s+/).filter(w=>w.length>2).slice(0,3).join(' ');
+    if(!words)return null;
+    const r=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'airtable-search',query:words})});
+    if(!r.ok)return null;
+    const d=await r.json();
+    return(d.records&&d.records.length>0)?d.records[0].fields['Réf Believe']||null:null;
+  }catch(e){return null;}
+}
 
-    const data = await resp.json();
-    const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+// Prompt
+function prompt(msg,pc){
+  return `Tu es un assistant pour D'or et de Platine (doretdeplatineshop.com), boutique de JuL gérée par Believe.
+Analyse ce message WhatsApp et retourne UNIQUEMENT un JSON brut sans markdown.${pc}
 
-    let json;
-    try {
-      let clean = raw.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-      const s = clean.indexOf('{');
-      const e = clean.lastIndexOf('}');
-      if (s < 0) throw new Error('Aucun JSON trouvé dans la réponse');
-      let jsonStr = e >= 0 ? clean.substring(s, e + 1) : clean.substring(s);
-      try {
-        json = JSON.parse(jsonStr);
-      } catch(parseErr) {
-        // Tentative de réparation d'un JSON tronqué
-        jsonStr = jsonStr.replace(/,\s*$/, '').replace(/,\s*([\]}])/g, '$1');
-        let opens = 0, openB = 0, inStr = false, esc = false;
-        for (let i = 0; i < jsonStr.length; i++) {
-          const c = jsonStr[i];
-          if (esc) { esc = false; continue; }
-          if (c === '\\' && inStr) { esc = true; continue; }
-          if (c === '"') { inStr = !inStr; continue; }
-          if (!inStr) {
-            if (c === '{') opens++; else if (c === '}') opens--;
-            if (c === '[') openB++; else if (c === ']') openB--;
-          }
-        }
-        while (openB > 0) { jsonStr += ']'; openB--; }
-        while (opens > 0) { jsonStr += '}'; opens--; }
-        json = JSON.parse(jsonStr);
-      }
-    } catch(pe) {
-      throw new Error('Réponse non parseable : ' + pe.message);
-    }
+ADRESSE: code postal seul → déduis la ville (13012→Marseille 12e, 75001→Paris 1er...). Ville seule → note CP manquant.
+ALERTES: adresse incomplète, quantité manquante, taille manquante pour textile.
 
-    if (json.destinataire && json.destinataire.adresse) {
-      json.destinataire.adresse = enrichAdresse(json.destinataire.adresse);
-    }
+JSON:
+{"products":[{"nom_original":"...","nom_propre":"...","reference_believe":"N/A","quantite":1,"taille":"N/A","statut":"trouve","source":"texte"}],"destinataire":{"nom":"...","adresse":"...","telephone":"..."},"alertes":[{"type":"warning","message":"..."}],"message_whatsapp":"Message WhatsApp complet avec *gras*, emojis, produits avec refs, adresse, demande de confirmation, et alertes sur infos manquantes."}
 
-    // Enrichir les produits avec les refs Believe (catalogue local)
-    document.getElementById('loaderText').textContent = 'Recherche des références Believe...';
-    if (json.products && json.products.length > 0) {
-      json.products = enrichWithAirtable(json.products);
-    }
-    lastResult = json;
-    renderResults(json);
+Message: ${msg}`;
+}
 
-  } catch(e) {
-    document.getElementById('emptyList').style.display = 'none';
-    document.getElementById('listContent').style.display = 'block';
-    document.getElementById('errorMsg').innerHTML = '<div class="error-msg">⚠️ ' + esc(e.message) + '</div>';
-  } finally {
-    btn.disabled = false;
-    document.getElementById('loader').className = 'loader';
+// Parser JSON robuste
+function parseJSON(txt){
+  const clean=txt.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+  const s=clean.indexOf('{'),e=clean.lastIndexOf('}');
+  if(s<0||e<0)throw new Error('Aucun JSON dans la réponse');
+  let str=clean.substring(s,e+1);
+  try{return JSON.parse(str);}catch(_){
+    str=str.replace(/,\s*$/,'');
+    let ob=0,ob2=0,ins=false,esc2=false;
+    for(const c of str){if(esc2){esc2=false;continue;}if(c==='\\'&&ins){esc2=true;continue;}if(c==='"'){ins=!ins;continue;}if(!ins){if(c==='{')ob++;else if(c==='}')ob--;else if(c==='[')ob2++;else if(c===']')ob2--;}}
+    while(ob2>0){str+=']';ob2--;}while(ob>0){str+='}';ob--;}
+    return JSON.parse(str);
   }
 }
 
-function buildPrompt(msg, photoProducts) {
-  photoProducts = photoProducts || [];
-  const photosDesc = photoProducts.length > 0
-    ? '\n\nProduits identifiés depuis les captures du site doretdeplatineshop.com:\n' + photoProducts.map(function(p,i){ return '- Photo '+(i+1)+': '+p; }).join('\n')
-    : '';
-
-  return 'Tu es un assistant pour la boutique D\'or et de Platine (doretdeplatineshop.com), boutique officielle de JuL gérée par Believe.\n\nTu as accès à la base Airtable (base ID: appouax19tnHJj0TD, table PRODUIT: tblGrm2yPn0ldTi01). Pour chaque produit identifié dans le message, utilise l\'outil Airtable search_records pour chercher le nom du produit dans le champ Designation et récupérer la Réf Believe correspondante (champ fld02IfEMQb0zorrD).\n\nAnalyse ce message WhatsApp de commande et retourne UNIQUEMENT un JSON brut sans markdown ni texte autour.' + photosDesc + '\n\nRÈGLES ADRESSE :\n- Si code postal présent sans ville → déduis la ville (ex: 13012 → Marseille 12e)\n- Si ville présente sans code postal → note qu\'il manque le CP\n- Vérifie cohérence CP/ville\n\nRÈGLES ALERTES :\n- Signale si adresse incomplète (manque rue, CP, ville ou téléphone)\n- Signale si quantité manquante pour un article\n- Signale si taille manquante pour un article textile\n\nFormat JSON :\n{\n  "products": [\n    {\n      "nom_original": "texte brut du message ou description photo",\n      "nom_propre": "nom officiel Airtable du produit",\n      "reference_believe": "réf trouvée dans Airtable ou N/A",\n      "quantite": 1,\n      "taille": "taille ou N/A",\n      "statut": "trouve" ou "manuel" ou "introuvable",\n      "source": "texte" ou "photo"\n    }\n  ],\n  "destinataire": {\n    "nom": "...",\n    "adresse": "adresse complète avec ville déduite si possible",\n    "telephone": "..."\n  },\n  "alertes": [\n    {"type": "warning" ou "error", "message": "description de l\'alerte"}\n  ],\n  "message_whatsapp": "message WhatsApp complet avec *gras*, emojis, récapitulatif produits avec refs Believe, adresse, et demande de confirmation. Signale les infos manquantes dans le message."\n}\n\nMessage à analyser :\n' + msg;
+// Render
+function render(j){
+  const ps=j.products||[];
+  let rows='';
+  for(const p of ps){
+    const bc=p.statut==='trouve'?'bok':p.statut==='introuvable'?'berr':'bwarn';
+    const bl=p.statut==='trouve'?'Trouvé':p.statut==='introuvable'?'Introuvable':'Manuel';
+    const src=p.source==='photo'?' 📸':'';
+    const ref=p.reference_believe&&p.reference_believe!=='N/A'?`<span class="ref">${esc(p.reference_believe)}</span>`:'<span style="color:var(--muted)">—</span>';
+    rows+=`<tr><td>${esc(p.nom_propre||p.nom_original)}${src}</td><td>${ref}</td><td>${p.quantite||'—'}</td><td>${esc(p.taille||'—')}</td><td><span class="badge ${bc}">${bl}</span></td></tr>`;
+  }
+  document.getElementById('pb').innerHTML=rows;
+  const d=j.destinataire||{};
+  document.getElementById('ad').innerHTML=(d.nom||d.adresse||d.telephone)?`<div class="acard"><div class="albl">📍 Livraison</div><p><strong>${esc(d.nom||'—')}</strong><br>${esc(d.adresse||'—')}<br>${esc(d.telephone||'—')}</p></div>`:'';
+  document.getElementById('al').innerHTML=(j.alertes||[]).map(a=>`<div class="alert ${a.type==='error'?'aerr':'awarn'}">⚠️ ${esc(a.message)}</div>`).join('');
+  document.getElementById('el').style.display='none';document.getElementById('lc').style.display='block';
+  if(j.message_whatsapp){document.getElementById('wo').textContent=j.message_whatsapp;document.getElementById('em').style.display='none';document.getElementById('mc').style.display='block';}
 }
 
-function renderResults(json) {
-  const prods = json.products || [];
-  const dest = json.destinataire || {};
-  const alertes = json.alertes || [];
-
-  let rows = '';
-  for (const p of prods) {
-    const bc = p.statut==='trouve' ? 'badge-ok' : p.statut==='introuvable' ? 'badge-err' : 'badge-warn';
-    const bl = p.statut==='trouve' ? 'Trouvé' : p.statut==='introuvable' ? 'Introuvable' : 'Manuel';
-    const src = p.source === 'photo' ? ' 📸' : '';
-    const ref = p.reference_believe && p.reference_believe !== 'N/A'
-      ? '<span class="ref-code">' + esc(p.reference_believe) + '</span>'
-      : '<span style="color:var(--muted)">—</span>';
-    rows += '<tr><td>' + esc(p.nom_propre || p.nom_original) + src + '</td><td>' + ref + '</td><td>' + (p.quantite || '—') + '</td><td>' + esc(p.taille || '—') + '</td><td><span class="badge ' + bc + '">' + bl + '</span></td></tr>';
-  }
-  document.getElementById('productBody').innerHTML = rows;
-
-  let addrHtml = '';
-  if (dest.nom || dest.adresse || dest.telephone) {
-    addrHtml = '<div class="addr-block"><div class="addr-label">📍 Livraison</div><p><strong>' + esc(dest.nom||'—') + '</strong><br>' + esc(dest.adresse||'—') + '<br>' + esc(dest.telephone||'—') + '</p></div>';
-  }
-  document.getElementById('addrBlock').innerHTML = addrHtml;
-
-  let alertsHtml = '';
-  for (const a of alertes) {
-    alertsHtml += '<div class="alert ' + (a.type==='error' ? 'alert-err' : 'alert-warn') + '">⚠️ ' + esc(a.message) + '</div>';
-  }
-  document.getElementById('alertsBlock').innerHTML = alertsHtml;
-
-  document.getElementById('emptyList').style.display = 'none';
-  document.getElementById('listContent').style.display = 'block';
-
-  if (json.message_whatsapp) {
-    document.getElementById('waOutput').textContent = json.message_whatsapp;
-    document.getElementById('emptyMsg').style.display = 'none';
-    document.getElementById('msgContent').style.display = 'block';
-  }
-}
-
-function copyMsg() {
-  if (!lastResult || !lastResult.message_whatsapp) return;
-  navigator.clipboard.writeText(lastResult.message_whatsapp).then(() => {
-    const btn = document.querySelector('.btn-copy');
-    btn.textContent = '✅ Copié !';
-    setTimeout(() => btn.textContent = '📋 Copier le message', 2000);
-  });
-}
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function cp(){if(!lastMsg)return;navigator.clipboard.writeText(lastMsg).then(()=>{const b=document.querySelector('.bcopy');b.textContent='✅ Copié !';setTimeout(()=>b.textContent='📋 Copier le message',2000);});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
