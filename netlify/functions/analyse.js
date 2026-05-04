@@ -22,6 +22,78 @@ function httpsPost(hostname, path, headers, body) {
   });
 }
 
+function httpsGet(path) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.airtable.com', path, method: 'GET',
+      headers: { 'Authorization': `Bearer ${AIRTABLE_TOKEN}` }
+    }, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString() }));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+// Étape 1 : Claude analyse le message → liste de produits sans refs
+async function analyseMessage(apiKey, message, photoNames) {
+  const photosCtx = photoNames.length > 0
+    ? '\nPhotos: ' + photoNames.join(', ')
+    : '';
+
+  const prompt = `Assistant D'or et de Platine. Analyse ce message WhatsApp.${photosCtx}
+
+Règles adresse: CP seul → déduis ville (13012=Marseille 12e, 75001=Paris 1er). Ville seule → note CP manquant.
+Alertes: adresse incomplète, quantité manquante, taille manquante (textile).
+
+JSON brut uniquement:
+{"products":[{"nom_original":"","nom_propre":"","reference_believe":"N/A","quantite":1,"taille":"","statut":"trouve","source":"texte"}],"destinataire":{"nom":"","adresse":"","telephone":""},"alertes":[{"type":"warning","message":""}],"message_whatsapp":"Message tutoiement, *gras*, emojis, refs Believe, adresse, demande confirmation, alertes."}
+
+Message: ${message}`;
+
+  const body = JSON.stringify({
+    model: 'claude-sonnet-4-5',
+    max_tokens: 2000,
+    messages: [{ role: 'user', content: [{ type: 'text', text: prompt }] }]
+  });
+
+  const res = await httpsPost('api.anthropic.com', '/v1/messages', {
+    'Content-Type': 'application/json',
+    'Content-Length': Buffer.byteLength(body),
+    'x-api-key': apiKey,
+    'anthropic-version': '2023-06-01'
+  }, body);
+
+  const data = JSON.parse(res.body);
+  if (res.status !== 200) throw new Error(data.error?.message || 'Erreur Claude ' + res.status);
+
+  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  return parseJSON(text);
+}
+
+// Étape 2 : Recherche ref Believe via Airtable REST pour chaque produit
+async function findRef(nomProduit) {
+  const q = nomProduit.split(/\s+/).filter(w => w.length > 2).slice(0, 2).join(' ');
+  if (!q) return null;
+
+  const formula = `SEARCH("${q.toLowerCase().replace(/"/g, '')}",LOWER({Designation}))`;
+  const path = `/v0/appouax19tnHJj0TD/tblGrm2yPn0ldTi01`
+    + `?filterByFormula=${encodeURIComponent(formula)}`
+    + `&fields[]=Designation&fields[]=R%C3%A9f%20Believe&maxRecords=1`;
+
+  try {
+    const res = await httpsGet(path);
+    const data = JSON.parse(res.body);
+    if (!data.records || data.records.length === 0) return null;
+    const fields = data.records[0].fields || {};
+    return fields['Réf Believe'] || null;
+  } catch(e) {
+    return null;
+  }
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: '{}' };
@@ -37,69 +109,24 @@ exports.handler = async function(event) {
   const { message, photoNames = [] } = body;
   if (!message) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Message manquant' }) };
 
-  const photosCtx = photoNames.length > 0
-    ? '\n\nProduits identifiés depuis les captures du site doretdeplatineshop.com :\n'
-      + photoNames.map((n, i) => `- Photo ${i+1}: ${n}`).join('\n')
-    : '';
-
-  const prompt = `Tu es un assistant pour D'or et de Platine (doretdeplatineshop.com), boutique de JuL gérée par Believe.
-Tu as accès à la base Airtable (base ID: appouax19tnHJj0TD, table: tblGrm2yPn0ldTi01).
-Les champs importants sont : Designation (fldba0MGx8lL3TQWS) et Réf Believe (fld02IfEMQb0zorrD).
-
-Analyse ce message WhatsApp et pour chaque produit identifié, utilise l'outil Airtable search_records pour chercher le produit dans la table et récupérer sa Réf Believe exacte.${photosCtx}
-
-ADRESSE : Si code postal seul → déduis la ville (13012→Marseille 12e, 75001→Paris 1er, 69001→Lyon 1er). Si ville seule → note que le CP manque.
-
-ALERTES à signaler :
-- Adresse incomplète (manque rue, CP, ville ou téléphone)
-- Quantité manquante pour un article
-- Taille manquante pour un article textile
-
-Retourne UNIQUEMENT un JSON brut sans markdown :
-{
-  "products": [
-    {"nom_original":"texte brut","nom_propre":"nom officiel Airtable","reference_believe":"REF trouvée ou N/A","quantite":1,"taille":"M ou N/A","statut":"trouve","source":"texte"}
-  ],
-  "destinataire": {"nom":"...","adresse":"adresse complète avec ville déduite","telephone":"..."},
-  "alertes": [{"type":"warning","message":"..."}],
-  "message_whatsapp": "Message WhatsApp complet avec *gras*, emojis, séparateurs ━━━, récapitulatif produits avec refs Believe, adresse, et demande de confirmation. Signale les infos manquantes. IMPORTANT : utilise toujours le tutoiement (tu, toi, ton, ta, tes) dans ce message."
-}
-
-Message à analyser :
-${message}`;
-
   try {
-    const claudeBody = JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 4000,
-      messages: [{ role: 'user', content: [{ type: 'text', text: prompt }] }],
-      mcp_servers: [{
-        type: 'url',
-        url: 'https://mcp.airtable.com/mcp',
-        name: 'airtable',
-        authorization_token: AIRTABLE_TOKEN
-      }]
-    });
+    // Étape 1 : Claude analyse le message (prompt court)
+    const result = await analyseMessage(apiKey, message, photoNames);
 
-    const res = await httpsPost('api.anthropic.com', '/v1/messages', {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(claudeBody),
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'mcp-client-2025-04-04'
-    }, claudeBody);
-
-    const data = JSON.parse(res.body);
-    if (res.status !== 200) {
-      return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: data.error?.message || 'Erreur Claude' }) };
+    // Étape 2 : Enrichir les refs via Airtable REST (sans passer par Claude)
+    if (result.products) {
+      for (const p of result.products) {
+        const nom = (p.nom_propre || p.nom_original || '').trim();
+        if (!nom) continue;
+        const ref = await findRef(nom);
+        if (ref) {
+          p.reference_believe = ref;
+          p.statut = 'trouve';
+        }
+      }
     }
 
-    // Extraire le texte final (après les appels MCP)
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-    const json = parseJSON(text);
-
-    return { statusCode: 200, headers: CORS, body: JSON.stringify(json) };
-
+    return { statusCode: 200, headers: CORS, body: JSON.stringify(result) };
   } catch(e) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
   }
@@ -108,7 +135,7 @@ ${message}`;
 function parseJSON(text) {
   const clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
   const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
-  if (s < 0 || e < 0) throw new Error('Aucun JSON dans la réponse');
+  if (s < 0 || e < 0) throw new Error('Aucun JSON');
   let str = clean.substring(s, e + 1);
   try { return JSON.parse(str); } catch(_) {
     str = str.replace(/,\s*$/, '');
