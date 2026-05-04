@@ -4,10 +4,6 @@ const AIRTABLE_TOKEN = 'pataBCeGvhlN3N4Uq.cfa8a096a4b28fac19de4ea8006778cc5822fa
 const AIRTABLE_BASE  = 'appouax19tnHJj0TD';
 const AIRTABLE_TABLE = 'tblGrm2yPn0ldTi01';
 
-// Champs Airtable
-const FIELD_DESIGNATION = 'fldba0MGx8lL3TQWS';
-const FIELD_REF         = 'fld02IfEMQb0zorrD';
-
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -15,11 +11,14 @@ const CORS = {
   'Content-Type': 'application/json'
 };
 
-// ── Helpers réseau ────────────────────────────────────────────────────────────
-
-function get(hostname, path, headers) {
+function httpsGet(path, token) {
   return new Promise((resolve, reject) => {
-    const req = https.request({ hostname, path, method: 'GET', headers }, res => {
+    const req = https.request({
+      hostname: 'api.airtable.com',
+      path,
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }, res => {
       const chunks = [];
       res.on('data', c => chunks.push(c));
       res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString() }));
@@ -29,7 +28,7 @@ function get(hostname, path, headers) {
   });
 }
 
-function post(hostname, path, headers, body) {
+function httpsPost(hostname, path, headers, body) {
   return new Promise((resolve, reject) => {
     const req = https.request({ hostname, path, method: 'POST', headers }, res => {
       const chunks = [];
@@ -42,30 +41,39 @@ function post(hostname, path, headers, body) {
   });
 }
 
-// ── Recherche Airtable ────────────────────────────────────────────────────────
-
+// Recherche Airtable — utilise les noms de champs dans fields[] et lit cellValuesByFieldId
 async function searchAirtable(query) {
-  const q = query.replace(/["']/g, '').substring(0, 60).toLowerCase();
-  const formula = `OR(SEARCH("${q}",LOWER({Designation})),SEARCH("${q}",LOWER({R\u00e9f Believe})))`;
-  const path = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
-    + `?filterByFormula=${encodeURIComponent(formula)}`
-    + `&fields[]=${encodeURIComponent('Designation')}&fields[]=${encodeURIComponent('R\u00e9f Believe')}&maxRecords=3`;
+  const q = query.replace(/["'\\]/g, '').substring(0, 60).toLowerCase();
+  if (!q) return null;
 
-  const res = await get('api.airtable.com', path, {
-    'Authorization': `Bearer ${AIRTABLE_TOKEN}`
+  // Recherche via filterByFormula avec les noms de champs
+  const formula = `OR(SEARCH("${q}",LOWER({Designation})),SEARCH("${q}",LOWER({R\u00e9f Believe})))`;
+  const qs = new URLSearchParams({
+    filterByFormula: formula,
+    maxRecords: '3',
+    returnFieldsByFieldId: 'true'  // Force le retour par field ID
   });
 
-  const data = JSON.parse(res.body);
-  if (!data.records || data.records.length === 0) return null;
+  const path = `/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}?${qs.toString()}`;
 
-  const fields = data.records[0].fields || {};
-  return {
-    nom: fields['Designation'] || fields[FIELD_DESIGNATION] || null,
-    ref: fields['Réf Believe'] || fields[FIELD_REF] || null
-  };
+  try {
+    const res = await httpsGet(path, AIRTABLE_TOKEN);
+    const data = JSON.parse(res.body);
+
+    if (!data.records || data.records.length === 0) return null;
+
+    // Avec returnFieldsByFieldId=true, les champs sont dans cellValuesByFieldId
+    const fields = data.records[0].cellValuesByFieldId || data.records[0].fields || {};
+
+    return {
+      nom: fields['fldba0MGx8lL3TQWS'] || fields['Designation'] || null,
+      ref: fields['fld02IfEMQb0zorrD'] || fields['R\u00e9f Believe'] || null
+    };
+  } catch(e) {
+    console.error('Airtable error:', e.message);
+    return null;
+  }
 }
-
-// ── Handler principal ─────────────────────────────────────────────────────────
 
 exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
@@ -76,39 +84,39 @@ exports.handler = async function(event) {
 
   const apiKey = (body.apiKey || '').trim();
   if (!apiKey.startsWith('sk-ant-')) {
-    return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Clé API invalide' }) };
+    return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Cl\u00e9 API invalide' }) };
   }
 
   const { message, photoNames = [] } = body;
   if (!message) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Message manquant' }) };
 
-  // ── 1. Claude analyse le message et identifie les produits ────────────────
+  // ── 1. Claude analyse le message ─────────────────────────────────
   const photosCtx = photoNames.length > 0
-    ? '\n\nProduits identifiés depuis les captures du site doretdeplatineshop.com :\n'
+    ? '\n\nProduits identifi\u00e9s depuis les captures du site doretdeplatineshop.com :\n'
       + photoNames.map((n, i) => `- Photo ${i+1}: ${n}`).join('\n')
     : '';
 
-  const promptAnalyse = `Tu es un assistant pour D'or et de Platine (doretdeplatineshop.com), boutique de JuL gérée par Believe.
+  const promptAnalyse = `Tu es un assistant pour D'or et de Platine (doretdeplatineshop.com), boutique de JuL g\u00e9r\u00e9e par Believe.
 Analyse ce message WhatsApp et retourne UNIQUEMENT un JSON brut sans markdown ni texte autour.${photosCtx}
 
-ADRESSE : Si code postal seul → déduis la ville (ex: 13012→Marseille 12e, 75001→Paris 1er, 69001→Lyon 1er). Si ville seule → note que le CP manque. Vérifie cohérence CP/ville.
+ADRESSE : Si code postal seul \u2192 d\u00e9duis la ville (ex: 13012\u2192Marseille 12e, 75001\u2192Paris 1er, 69001\u2192Lyon 1er). Si ville seule \u2192 note que le CP manque.
 
-ALERTES à signaler dans "alertes" ET dans le message WhatsApp :
-- Adresse incomplète (manque rue, CP, ville ou téléphone)
-- Quantité manquante pour un article
+ALERTES \u00e0 signaler :
+- Adresse incompl\u00e8te (manque rue, CP, ville ou t\u00e9l\u00e9phone)
+- Quantit\u00e9 manquante pour un article
 - Taille manquante pour un article textile
 
-JSON attendu (reference_believe doit rester "N/A" — sera rempli ensuite) :
+JSON attendu :
 {
   "products": [
     {"nom_original":"texte brut","nom_propre":"nom officiel du produit","reference_believe":"N/A","quantite":1,"taille":"M ou N/A","statut":"trouve","source":"texte"}
   ],
-  "destinataire": {"nom":"...","adresse":"adresse complète avec ville déduite","telephone":"..."},
+  "destinataire": {"nom":"...","adresse":"adresse compl\u00e8te avec ville d\u00e9duite","telephone":"..."},
   "alertes": [{"type":"warning","message":"..."}],
-  "message_whatsapp": "Message WhatsApp complet avec *gras*, emojis, séparateurs ━━━, récapitulatif produits avec refs Believe (à remplir), adresse, et demande de confirmation. Signale clairement les infos manquantes."
+  "message_whatsapp": "Message WhatsApp complet avec *gras*, emojis, s\u00e9parateurs \u2501\u2501\u2501, r\u00e9capitulatif produits avec refs Believe, adresse, et demande de confirmation."
 }
 
-Message à analyser :
+Message \u00e0 analyser :
 ${message}`;
 
   let claudeResult;
@@ -119,7 +127,7 @@ ${message}`;
       messages: [{ role: 'user', content: [{ type: 'text', text: promptAnalyse }] }]
     });
 
-    const res = await post('api.anthropic.com', '/v1/messages', {
+    const res = await httpsPost('api.anthropic.com', '/v1/messages', {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(claudeBody),
       'x-api-key': apiKey,
@@ -137,35 +145,19 @@ ${message}`;
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Erreur analyse: ' + e.message }) };
   }
 
-  // ── 2. Enrichir les refs Believe via Airtable ─────────────────────────────
+  // ── 2. Enrichir les refs Believe via Airtable ─────────────────────
   if (claudeResult.products) {
     for (const p of claudeResult.products) {
       const nom = (p.nom_propre || p.nom_original || '').trim();
       if (!nom) continue;
 
-      // Chercher avec les 3 premiers mots significatifs
+      // Chercher avec les mots significatifs
       const words = nom.split(/\s+/).filter(w => w.length > 2).slice(0, 3).join(' ');
-      try {
-        const found = await searchAirtable(words);
-        if (found && found.ref) {
-          p.reference_believe = found.ref;
-          if (found.nom) p.nom_propre = found.nom;
-          p.statut = 'trouve';
-        }
-      } catch(e) {
-        console.error('Airtable error for', nom, e.message);
-      }
-    }
-  }
-
-  // ── 3. Mettre à jour le message WhatsApp avec les vraies refs ─────────────
-  if (claudeResult.message_whatsapp && claudeResult.products) {
-    // Remplacer "N/A" dans le message par les vraies refs trouvées
-    for (const p of claudeResult.products) {
-      if (p.reference_believe && p.reference_believe !== 'N/A') {
-        claudeResult.message_whatsapp = claudeResult.message_whatsapp
-          .replace(new RegExp(escapeRegex(p.nom_propre || p.nom_original) + '[^\\n]*N/A', 'g'),
-            match => match.replace('N/A', p.reference_believe));
+      const found = await searchAirtable(words);
+      if (found && found.ref) {
+        p.reference_believe = found.ref;
+        if (found.nom) p.nom_propre = found.nom;
+        p.statut = 'trouve';
       }
     }
   }
@@ -177,15 +169,12 @@ ${message}`;
   };
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function parseJSON(text) {
   const clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
   const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
-  if (s < 0 || e < 0) throw new Error('Aucun JSON dans la réponse');
+  if (s < 0 || e < 0) throw new Error('Aucun JSON dans la r\u00e9ponse');
   let str = clean.substring(s, e + 1);
   try { return JSON.parse(str); } catch(_) {
-    // Réparer JSON tronqué
     str = str.replace(/,\s*$/, '');
     let ob = 0, ob2 = 0, ins = false, esc = false;
     for (const c of str) {
@@ -201,8 +190,4 @@ function parseJSON(text) {
     while (ob > 0)  { str += '}'; ob--; }
     return JSON.parse(str);
   }
-}
-
-function escapeRegex(s) {
-  return (s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
