@@ -3,6 +3,12 @@
   publish = "."
 
 [[redirects]]
-  from = "/api/claude"
-  to = "/.netlify/functions/claude"
+  from = "/api/analyse"
+  to = "/.netlify/functions/analyse"
   status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "ALLOWALL"
+    Content-Security-Policy = "frame-ancestors *"
