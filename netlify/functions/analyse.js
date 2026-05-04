@@ -9,15 +9,51 @@ const CORS = {
   'Content-Type': 'application/json'
 };
 
-function httpsPost(hostname, path, headers, body) {
+function claudePost(apiKey, body) {
+  const s = JSON.stringify(body);
   return new Promise((resolve, reject) => {
-    const req = https.request({ hostname, path, method: 'POST', headers }, res => {
+    const req = https.request({
+      hostname: 'api.anthropic.com',
+      path: '/v1/messages',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(s),
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      }
+    }, res => {
       const chunks = [];
       res.on('data', c => chunks.push(c));
       res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString() }));
     });
     req.on('error', reject);
-    req.write(body);
+    req.write(s);
+    req.end();
+  });
+}
+
+function claudePostMcp(apiKey, body) {
+  const s = JSON.stringify(body);
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.anthropic.com',
+      path: '/v1/messages',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(s),
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'mcp-client-2025-04-04'
+      }
+    }, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString() }));
+    });
+    req.on('error', reject);
+    req.write(s);
     req.end();
   });
 }
@@ -37,50 +73,99 @@ exports.handler = async function(event) {
   const { message, photoNames = [] } = body;
   if (!message) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Message manquant' }) };
 
-  const photos = photoNames.length > 0 ? '\nPhotos: ' + photoNames.join(', ') : '';
+  const photos = photoNames.length > 0 ? '\nPhotos identifiées: ' + photoNames.join(', ') : '';
 
-  // Prompt court — Claude cherche les refs dans Airtable via MCP
-  const prompt = `Assistant D'or et de Platine. Analyse ce message WhatsApp.${photos}
-Pour chaque produit, cherche dans Airtable (base appouax19tnHJj0TD, table tblGrm2yPn0ldTi01) la Réf Believe (champ fld02IfEMQb0zorrD) via le champ Designation (fldba0MGx8lL3TQWS).
-CP seul→déduis ville (13012=Marseille 12e, 75001=Paris 1er). Ville seule→note CP manquant.
+  // ── ÉTAPE 1 : Analyser le message (sans Airtable, prompt ultra-court) ────
+  const step1Prompt = `Assistant D'or et de Platine. Analyse ce message WhatsApp.${photos}
+CP seul→ville (13012=Marseille 12e,75001=Paris 1er,69001=Lyon 1er). Ville seule→note CP manquant.
 Alertes: adresse incomplète, quantité/taille manquante (textile).
-JSON brut uniquement:
-{"products":[{"nom_original":"","nom_propre":"","reference_believe":"REF ou N/A","quantite":1,"taille":"","statut":"trouve","source":"texte"}],"destinataire":{"nom":"","adresse":"","telephone":""},"alertes":[{"type":"warning","message":""}],"message_whatsapp":"Tutoiement, *gras*, emojis, refs Believe, adresse, confirmation, alertes."}
+JSON UNIQUEMENT:
+{"products":[{"nom_original":"","nom_propre":"","quantite":1,"taille":"","source":"texte"}],"destinataire":{"nom":"","adresse":"","telephone":""},"alertes":[{"type":"warning","message":""}]}
 Message: ${message}`;
 
+  let result;
   try {
-    const claudeBody = JSON.stringify({
+    const r1 = await claudePost(apiKey, {
       model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: [{ type: 'text', text: prompt }] }],
-      mcp_servers: [{
-        type: 'url',
-        url: 'https://mcp.airtable.com/mcp',
-        name: 'airtable',
-        authorization_token: AIRTABLE_TOKEN
-      }]
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: step1Prompt }]
     });
-
-    const res = await httpsPost('api.anthropic.com', '/v1/messages', {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(claudeBody),
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'mcp-client-2025-04-04'
-    }, claudeBody);
-
-    const data = JSON.parse(res.body);
-    if (res.status !== 200) {
-      return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: data.error?.message || 'Erreur Claude' }) };
-    }
-
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-    const json = parseJSON(text);
-    return { statusCode: 200, headers: CORS, body: JSON.stringify(json) };
-
+    const d1 = JSON.parse(r1.body);
+    if (r1.status !== 200) throw new Error(d1.error?.message || 'Erreur step1');
+    const t1 = (d1.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    result = parseJSON(t1);
   } catch(e) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Erreur analyse: ' + e.message }) };
   }
+
+  // ── ÉTAPE 2 : Chercher les refs Believe pour chaque produit via MCP ──────
+  if (result.products && result.products.length > 0) {
+    for (const p of result.products) {
+      const nom = (p.nom_propre || p.nom_original || '').trim();
+      if (!nom) { p.reference_believe = 'N/A'; p.statut = 'introuvable'; continue; }
+
+      // Appel Claude minimal avec MCP Airtable juste pour chercher la ref
+      const searchPrompt = `Cherche dans Airtable (base appouax19tnHJj0TD, table tblGrm2yPn0ldTi01) le produit "${nom}".
+Retourne UNIQUEMENT la Réf Believe (champ fld02IfEMQb0zorrD) du premier résultat trouvé, ou "N/A" si rien trouvé. Rien d'autre.`;
+
+      try {
+        const r2 = await claudePostMcp(apiKey, {
+          model: 'claude-sonnet-4-5',
+          max_tokens: 50,
+          messages: [{ role: 'user', content: searchPrompt }],
+          mcp_servers: [{
+            type: 'url',
+            url: 'https://mcp.airtable.com/mcp',
+            name: 'airtable',
+            authorization_token: AIRTABLE_TOKEN
+          }]
+        });
+        const d2 = JSON.parse(r2.body);
+        if (r2.status === 200) {
+          const ref = (d2.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+          p.reference_believe = ref && ref !== 'N/A' && ref.length < 30 ? ref : 'N/A';
+          p.statut = p.reference_believe !== 'N/A' ? 'trouve' : 'introuvable';
+        } else {
+          p.reference_believe = 'N/A';
+          p.statut = 'introuvable';
+        }
+      } catch(e) {
+        p.reference_believe = 'N/A';
+        p.statut = 'introuvable';
+      }
+    }
+  }
+
+  // ── ÉTAPE 3 : Générer le message WhatsApp (prompt court) ─────────────────
+  const prodList = (result.products || []).map(p =>
+    `- ${p.nom_propre || p.nom_original} | Réf: ${p.reference_believe || 'N/A'} | Qté: ${p.quantite || '?'} | Taille: ${p.taille || '?'}`
+  ).join('\n');
+
+  const d = result.destinataire || {};
+  const alertesList = (result.alertes || []).map(a => `- ${a.message}`).join('\n');
+
+  const step3Prompt = `Génère un message WhatsApp de confirmation de commande D'or et de Platine.
+Tutoiement, *gras*, emojis, séparateurs ━━━.
+Produits:\n${prodList}
+Livraison: ${d.nom || '?'}, ${d.adresse || '?'}, ${d.telephone || '?'}
+${alertesList ? 'Infos manquantes à signaler:\n' + alertesList : ''}
+Retourne UNIQUEMENT le message WhatsApp, rien d'autre.`;
+
+  try {
+    const r3 = await claudePost(apiKey, {
+      model: 'claude-sonnet-4-5',
+      max_tokens: 800,
+      messages: [{ role: 'user', content: step3Prompt }]
+    });
+    const d3 = JSON.parse(r3.body);
+    if (r3.status === 200) {
+      result.message_whatsapp = (d3.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+    }
+  } catch(e) {
+    result.message_whatsapp = '';
+  }
+
+  return { statusCode: 200, headers: CORS, body: JSON.stringify(result) };
 };
 
 function parseJSON(text) {
