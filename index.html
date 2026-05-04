@@ -9,262 +9,337 @@
 :root{--gold:#C9A84C;--black:#0A0A0A;--dark:#141414;--panel:#1C1C1C;--border:#2A2A2A;--text:#F0EDE8;--muted:#888;--green:#2ECC71;--orange:#F39C12;--red:#E74C3C;--radius:10px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--black);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;font-size:14px}
-.header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--dark)}
+
+/* HEADER */
+.hdr{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--dark)}
 .logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--black);flex-shrink:0}
 .ht h1{font-size:15px;font-weight:600}.ht p{font-size:12px;color:var(--muted);margin-top:2px}
 .ka{margin-left:auto;display:flex;align-items:center;gap:8px}
-.kdot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.kdot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s}
 .kdot.ok{background:var(--green)}
 .kinput{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;width:260px;outline:none}
 .kinput:focus{border-color:var(--gold)}.kinput::placeholder{color:var(--muted)}
-.layout{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 61px)}
+
+/* LAYOUT */
+.lay{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 61px)}
 .left{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .right{display:flex;flex-direction:column;overflow:hidden}
 .ptitle{padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.1em}
 .iwrap{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
-textarea{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;line-height:1.65;resize:none;flex:1;min-height:160px;outline:none;transition:border-color .2s}
+
+/* INPUTS */
+textarea{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;line-height:1.65;resize:none;flex:1;min-height:180px;outline:none;transition:border-color .2s}
 textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)}
-.dz{border:1.5px dashed var(--border);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s}
+.dz{border:1.5px dashed var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s}
 .dz:hover,.dz.drag{border-color:var(--gold);background:rgba(201,168,76,.05)}
 .dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.dz .ic{font-size:20px;margin-bottom:4px}.dz p{font-size:12px;color:var(--muted)}.dz span{color:var(--gold);font-weight:600}
-.prevs{display:flex;flex-wrap:wrap;gap:8px}
+.dz .ic{font-size:18px;margin-bottom:3px}.dz p{font-size:12px;color:var(--muted)}.dz span{color:var(--gold);font-weight:600}
+.pvs{display:flex;flex-wrap:wrap;gap:8px}
 .tw{position:relative;display:inline-block}
-.th{width:60px;height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border)}
+.th{width:58px;height:58px;border-radius:6px;object-fit:cover;border:1px solid var(--border)}
 .rb{position:absolute;top:-5px;right:-5px;background:var(--red);color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.loader{display:none;align-items:center;gap:10px;padding:8px 0;font-size:13px;color:var(--muted)}
-.loader.show{display:flex}
+.ldr{display:none;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:var(--muted)}
+.ldr.on{display:flex}
 .spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
-.btn-go{width:100%;padding:12px;background:var(--gold);color:var(--black);border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:opacity .15s}
-.btn-go:hover{opacity:.85}.btn-go:disabled{opacity:.4;cursor:not-allowed}
+.bgo{width:100%;padding:12px;background:var(--gold);color:var(--black);border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:opacity .15s}
+.bgo:hover{opacity:.85}.bgo:disabled{opacity:.4;cursor:not-allowed}
+
+/* TABS */
 .tabs{display:flex;background:var(--dark);border-bottom:1px solid var(--border)}
 .tab{padding:12px 20px;font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.07em;transition:color .15s,border-color .15s}
 .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
 .tv{flex:1;overflow-y:auto;padding:20px;display:none}.tv.on{display:block}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:10px;color:var(--muted);text-align:center}
 .empty .ei{font-size:30px;opacity:.35}.empty p{font-size:13px}
+
+/* TABLEAU PRODUITS */
 .pt{width:100%;border-collapse:collapse;font-size:12.5px}
 .pt th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
 .pt td{padding:9px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;line-height:1.4}
 .pt tr:last-child td{border-bottom:none}
 .ref{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);background:rgba(201,168,76,.1);padding:2px 6px;border-radius:4px;white-space:nowrap}
 .badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em}
-.bok{background:rgba(46,204,113,.15);color:#2ECC71}.bwarn{background:rgba(243,156,18,.15);color:#F39C12}.berr{background:rgba(231,76,60,.15);color:#E74C3C}
+.bok{background:rgba(46,204,113,.15);color:#2ECC71}
+.bwarn{background:rgba(243,156,18,.15);color:#F39C12}
+.berr{background:rgba(231,76,60,.15);color:#E74C3C}
+
+/* ADRESSE */
 .acard{margin-top:14px;background:var(--panel);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px}
 .albl{font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 .acard p{font-size:13px;line-height:1.7}
-.alerts{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+
+/* ALERTES */
+.alts{margin-top:12px;display:flex;flex-direction:column;gap:8px}
 .alert{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5;border-left:3px solid}
 .awarn{background:rgba(243,156,18,.1);border-color:var(--orange);color:#F5C053}
 .aerr{background:rgba(231,76,60,.1);border-color:var(--red);color:#EC8076}
+
+/* MESSAGE WA */
 .wabox{background:var(--panel);border-left:3px solid #25D366;border-radius:var(--radius);padding:16px 18px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word;font-family:'DM Mono',monospace;margin-bottom:12px}
-.bcopy{padding:10px 24px;background:#25D366;color:white;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
-.bcopy:hover{opacity:.85}
+.bcp{padding:10px 24px;background:#25D366;color:white;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.bcp:hover{opacity:.85}
+
+/* ERREUR */
 .ebox{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:#EC8076;margin-bottom:12px;line-height:1.5;word-break:break-all}
-@media(max-width:640px){.layout{grid-template-columns:1fr;height:auto}.left{border-right:none;border-bottom:1px solid var(--border)}.ka{display:none}}
+
+@media(max-width:640px){.lay{grid-template-columns:1fr;height:auto}.left{border-right:none;border-bottom:1px solid var(--border)}.ka{display:none}}
 </style>
 </head>
 <body>
-<div class="header">
+
+<div class="hdr">
   <div class="logo">D&P</div>
-  <div class="ht"><h1>Assistant Commandes WhatsApp</h1><p>D'or et de Platine — Analyse & Confirmation</p></div>
+  <div class="ht">
+    <h1>Assistant Commandes WhatsApp</h1>
+    <p>D'or et de Platine — Analyse & Confirmation</p>
+  </div>
   <div class="ka">
     <div class="kdot" id="kd"></div>
     <input class="kinput" type="password" id="ki" placeholder="Clé API Anthropic sk-ant-..." oninput="onKey()"/>
   </div>
 </div>
 
-<div class="layout">
+<div class="lay">
+  <!-- GAUCHE : saisie -->
   <div class="left">
     <div class="ptitle">📱 Message WhatsApp reçu</div>
     <div class="iwrap">
-      <textarea id="mi" rows="10" placeholder="Collez ici le message WhatsApp reçu...&#10;&#10;Exemple :&#10;Je voudrais 2 casquettes D&P Club taille M&#10;et 1 survêtement noir XL&#10;&#10;Livraison : Marie Dupont&#10;12 rue de la Paix, 75001 Paris&#10;06 12 34 56 78"></textarea>
+      <textarea id="mi" rows="10" placeholder="Collez ici le message WhatsApp reçu...&#10;&#10;Exemple :&#10;Bonjour, je voudrais 2 casquettes D&P Club taille M&#10;et 1 survêtement noir XL&#10;&#10;Livraison : Marie Dupont&#10;12 rue de la Paix, 75001 Paris&#10;06 12 34 56 78"></textarea>
+
       <div class="dz" id="dz">
-        <input type="file" id="fi" accept="image/*" multiple onchange="addF(this.files)"/>
+        <input type="file" id="fi" accept="image/*" multiple onchange="addFiles(this.files)"/>
         <div class="ic">📸</div>
         <p>Glissez les <span>captures du site</span> ici<br>ou cliquez pour sélectionner</p>
       </div>
-      <div class="prevs" id="pv"></div>
-      <div class="loader" id="ld"><div class="spin"></div><span id="lm">Analyse...</span></div>
-      <button class="btn-go" id="bg" onclick="go()">Analyser la commande →</button>
+
+      <div class="pvs" id="pv"></div>
+
+      <div class="ldr" id="ld">
+        <div class="spin"></div>
+        <span id="lm">Analyse...</span>
+      </div>
+
+      <button class="bgo" id="bg" onclick="go()">Analyser la commande →</button>
     </div>
   </div>
 
+  <!-- DROITE : résultats -->
   <div class="right">
     <div class="tabs">
-      <div class="tab on" id="t1" onclick="tab('list')">📦 Liste produits</div>
-      <div class="tab" id="t2" onclick="tab('msg')">💬 Message WhatsApp</div>
+      <div class="tab on" id="t1" onclick="stab('list')">📦 Liste produits</div>
+      <div class="tab" id="t2" onclick="stab('msg')">💬 Message WhatsApp</div>
     </div>
+
     <div class="tv on" id="vl">
       <div class="empty" id="el"><div class="ei">📋</div><p>La liste apparaîtra ici<br>après analyse</p></div>
       <div id="lc" style="display:none">
         <div id="eb"></div>
-        <table class="pt"><thead><tr><th>Produit</th><th>Réf Believe</th><th>Qté</th><th>Taille</th><th></th></tr></thead><tbody id="pb"></tbody></table>
-        <div id="ad"></div><div class="alerts" id="al"></div>
+        <table class="pt">
+          <thead><tr><th>Produit</th><th>Réf Believe</th><th>Qté</th><th>Taille</th><th></th></tr></thead>
+          <tbody id="pb"></tbody>
+        </table>
+        <div id="ad"></div>
+        <div class="alts" id="al"></div>
       </div>
     </div>
+
     <div class="tv" id="vm">
       <div class="empty" id="em"><div class="ei">💬</div><p>Le message apparaîtra ici<br>après analyse</p></div>
-      <div id="mc" style="display:none"><div class="wabox" id="wo"></div><button class="bcopy" onclick="cp()">📋 Copier le message</button></div>
+      <div id="mc" style="display:none">
+        <div class="wabox" id="wo"></div>
+        <button class="bcp" onclick="cp()">📋 Copier le message</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-let photos=[],lastMsg='';
+// ── État global ───────────────────────────────────────────────────────────────
+let photos = [];
+let lastMsg = '';
 
-// Clé API
-function onKey(){const k=document.getElementById('ki').value.trim();localStorage.setItem('dp_k',k);document.getElementById('kd').className='kdot'+(k.startsWith('sk-ant-')?' ok':'');}
-window.addEventListener('load',()=>{const s=localStorage.getItem('dp_k')||'';if(s){document.getElementById('ki').value=s;document.getElementById('kd').className='kdot'+(s.startsWith('sk-ant-')?' ok':'');}});
-function key(){return(document.getElementById('ki').value||localStorage.getItem('dp_k')||'').trim();}
+// ── Clé API ───────────────────────────────────────────────────────────────────
+function onKey() {
+  const k = document.getElementById('ki').value.trim();
+  localStorage.setItem('dp_k', k);
+  document.getElementById('kd').className = 'kdot' + (k.startsWith('sk-ant-') ? ' ok' : '');
+}
+window.addEventListener('load', () => {
+  const s = localStorage.getItem('dp_k') || '';
+  if (s) { document.getElementById('ki').value = s; document.getElementById('kd').className = 'kdot' + (s.startsWith('sk-ant-') ? ' ok' : ''); }
+});
+function key() { return (document.getElementById('ki').value || localStorage.getItem('dp_k') || '').trim(); }
 
-// Tabs
-function tab(t){
-  document.getElementById('t1').className='tab'+(t==='list'?' on':'');
-  document.getElementById('t2').className='tab'+(t==='msg'?' on':'');
-  document.getElementById('vl').className='tv'+(t==='list'?' on':'');
-  document.getElementById('vm').className='tv'+(t==='msg'?' on':'');
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function stab(t) {
+  ['t1','t2'].forEach((id,i) => document.getElementById(id).className = 'tab' + (t===['list','msg'][i]?' on':''));
+  ['vl','vm'].forEach((id,i) => document.getElementById(id).className = 'tv' + (t===['list','msg'][i]?' on':''));
 }
 
-// Photos
-const dze=document.getElementById('dz');
-dze.addEventListener('dragover',e=>{e.preventDefault();dze.classList.add('drag');});
-dze.addEventListener('dragleave',()=>dze.classList.remove('drag'));
-dze.addEventListener('drop',e=>{e.preventDefault();dze.classList.remove('drag');addF(e.dataTransfer.files);});
-function addF(files){for(const f of files){if(!f.type.startsWith('image/'))continue;compress(f).then(p=>{photos.push(p);rp();});}}
-function compress(file){return new Promise(res=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);const M=800;let w=img.width,h=img.height;if(w>M){h=Math.round(h*M/w);w=M;}if(h>M){w=Math.round(w*M/h);h=M;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res({data:c.toDataURL('image/jpeg',.65).split(',')[1],type:'image/jpeg',name:file.name});};img.src=url;});}
-function rp(){const el=document.getElementById('pv');el.innerHTML='';photos.forEach((p,i)=>{const w=document.createElement('div');w.className='tw';w.innerHTML=`<img class="th" src="data:${p.type};base64,${p.data}"><button class="rb" onclick="rph(${i})">✕</button>`;el.appendChild(w);});}
-function rph(i){photos.splice(i,1);rp();}
+// ── Photos ────────────────────────────────────────────────────────────────────
+const dze = document.getElementById('dz');
+dze.addEventListener('dragover', e => { e.preventDefault(); dze.classList.add('drag'); });
+dze.addEventListener('dragleave', () => dze.classList.remove('drag'));
+dze.addEventListener('drop', e => { e.preventDefault(); dze.classList.remove('drag'); addFiles(e.dataTransfer.files); });
 
-// Loader
-function setL(s,m){document.getElementById('ld').className='loader'+(s?' show':'');if(m)document.getElementById('lm').textContent=m;}
+function addFiles(files) {
+  for (const f of files) {
+    if (!f.type.startsWith('image/')) continue;
+    compress(f).then(p => { photos.push(p); rp(); });
+  }
+}
 
-// Analyse
-async function go(){
-  const k=key();
-  if(!k.startsWith('sk-ant-')){alert('Entrez votre clé API Anthropic en haut à droite');return;}
-  const msg=document.getElementById('mi').value.trim();
-  if(!msg){alert('Collez un message WhatsApp');return;}
+function compress(file) {
+  return new Promise(res => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const M = 800;
+      let w = img.width, h = img.height;
+      if (w > M) { h = Math.round(h*M/w); w = M; }
+      if (h > M) { w = Math.round(w*M/h); h = M; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      res({ data: c.toDataURL('image/jpeg', .65).split(',')[1], type: 'image/jpeg', name: file.name });
+    };
+    img.src = url;
+  });
+}
 
-  const btn=document.getElementById('bg');btn.disabled=true;
-  setL(true,'Analyse du message...');
-  document.getElementById('el').style.display='none';
-  document.getElementById('lc').style.display='none';
-  document.getElementById('em').style.display='none';
-  document.getElementById('mc').style.display='none';
-  document.getElementById('eb').innerHTML='';
+function rp() {
+  const el = document.getElementById('pv');
+  el.innerHTML = '';
+  photos.forEach((p, i) => {
+    const w = document.createElement('div');
+    w.className = 'tw';
+    w.innerHTML = `<img class="th" src="data:${p.type};base64,${p.data}" title="${esc(p.name)}"><button class="rb" onclick="del(${i})">✕</button>`;
+    el.appendChild(w);
+  });
+}
+function del(i) { photos.splice(i, 1); rp(); }
+
+// ── Loader ────────────────────────────────────────────────────────────────────
+function setL(on, msg) {
+  document.getElementById('ld').className = 'ldr' + (on ? ' on' : '');
+  if (msg) document.getElementById('lm').textContent = msg;
+}
+
+// ── Analyse principale ────────────────────────────────────────────────────────
+async function go() {
+  const k = key();
+  if (!k.startsWith('sk-ant-')) { alert('Entrez votre clé API Anthropic en haut à droite'); return; }
+  const msg = document.getElementById('mi').value.trim();
+  if (!msg) { alert('Collez un message WhatsApp'); return; }
+
+  const btn = document.getElementById('bg');
+  btn.disabled = true;
+  setL(true, 'Analyse du message...');
+  show('el', false); show('lc', false);
+  show('em', false); show('mc', false);
+  document.getElementById('eb').innerHTML = '';
 
   try {
-    // Photos : appel direct Anthropic (images trop lourdes pour le proxy)
-    let pnames=[];
-    for(let i=0;i<photos.length;i++){
-      setL(true,`Analyse photo ${i+1}/${photos.length}...`);
-      try{
-        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-          body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:150,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photos[i].type,data:photos[i].data}},{type:'text',text:"Capture du site doretdeplatineshop.com. Lis le nom exact du produit dans le titre ou la navigation. Réponds uniquement avec le nom du produit."}]}]})});
-        if(r.ok){const d=await r.json();const n=(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();if(n)pnames.push(n);}
-      }catch(e){console.warn('photo err',e);}
+    // Étape 1 : identifier les produits des photos (appel direct Anthropic — images)
+    const photoNames = [];
+    for (let i = 0; i < photos.length; i++) {
+      setL(true, `Analyse photo ${i+1}/${photos.length}...`);
+      try {
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': k,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-5',
+            max_tokens: 100,
+            messages: [{ role: 'user', content: [
+              { type: 'image', source: { type: 'base64', media_type: photos[i].type, data: photos[i].data } },
+              { type: 'text', text: "Capture du site doretdeplatineshop.com. Lis uniquement le nom exact du produit dans le fil de navigation ou le titre. Réponds avec juste le nom, rien d'autre." }
+            ]}]
+          })
+        });
+        if (r.ok) {
+          const d = await r.json();
+          const n = (d.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+          if (n) photoNames.push(n);
+        }
+      } catch(e) { console.warn('Photo err:', e); }
     }
 
-    // Analyse texte via proxy
-    setL(true,'Génération de la commande...');
-    const pc=pnames.length>0?'\n\nProduits depuis les captures :\n'+pnames.map((n,i)=>`- Photo ${i+1}: ${n}`).join('\n'):'';
+    // Étape 2 : tout envoyer à la fonction Netlify (Claude + Airtable côté serveur)
+    setL(true, 'Recherche des produits et références Believe...');
+    const resp = await fetch('/api/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: k, message: msg, photoNames })
+    });
 
-    const resp=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({apiKey:k,model:'claude-sonnet-4-5',max_tokens:4000,
-        messages:[{role:'user',content:[{type:'text',text:prompt(msg,pc)}]}]})});
+    const raw = await resp.text();
+    let json;
+    try { json = JSON.parse(raw); } catch(e) { throw new Error('Réponse invalide: ' + raw.substring(0, 200)); }
 
-    const raw=await resp.text();
-    let api;try{api=JSON.parse(raw);}catch(e){throw new Error('Réponse serveur invalide: '+raw.substring(0,200));}
-    if(!resp.ok)throw new Error('Erreur '+resp.status+' — '+JSON.stringify(api));
+    if (!resp.ok) throw new Error(json.error || 'Erreur ' + resp.status);
 
-    const txt=(api.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    let json=parseJSON(txt);
-
-    // Enrichir refs Airtable
-    setL(true,'Recherche des références Believe...');
-    if(json.products){
-      for(const p of json.products){
-        if(p.reference_believe&&p.reference_believe!=='N/A')continue;
-        const nom=(p.nom_propre||p.nom_original||'').trim();
-        if(!nom)continue;
-        const ref=await searchAt(nom);
-        if(ref){p.reference_believe=ref;p.statut='trouve';}
-      }
-    }
-
-    lastMsg=json.message_whatsapp||'';
+    lastMsg = json.message_whatsapp || '';
     render(json);
-  }catch(e){
-    document.getElementById('el').style.display='none';
-    document.getElementById('lc').style.display='block';
-    document.getElementById('eb').innerHTML=`<div class="ebox">⚠️ ${esc(e.message)}</div>`;
-  }finally{btn.disabled=false;setL(false);}
-}
 
-// Recherche Airtable via proxy
-async function searchAt(nom){
-  try{
-    const words=nom.replace(/[^\w\s\u00C0-\u024F]/g,' ').trim().split(/\s+/).filter(w=>w.length>2).slice(0,3).join(' ');
-    if(!words)return null;
-    const r=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'airtable-search',query:words})});
-    if(!r.ok)return null;
-    const d=await r.json();
-    return(d.records&&d.records.length>0)?d.records[0].fields['Réf Believe']||null:null;
-  }catch(e){return null;}
-}
-
-// Prompt
-function prompt(msg,pc){
-  return `Tu es un assistant pour D'or et de Platine (doretdeplatineshop.com), boutique de JuL gérée par Believe.
-Analyse ce message WhatsApp et retourne UNIQUEMENT un JSON brut sans markdown.${pc}
-
-ADRESSE: code postal seul → déduis la ville (13012→Marseille 12e, 75001→Paris 1er...). Ville seule → note CP manquant.
-ALERTES: adresse incomplète, quantité manquante, taille manquante pour textile.
-
-JSON:
-{"products":[{"nom_original":"...","nom_propre":"...","reference_believe":"N/A","quantite":1,"taille":"N/A","statut":"trouve","source":"texte"}],"destinataire":{"nom":"...","adresse":"...","telephone":"..."},"alertes":[{"type":"warning","message":"..."}],"message_whatsapp":"Message WhatsApp complet avec *gras*, emojis, produits avec refs, adresse, demande de confirmation, et alertes sur infos manquantes."}
-
-Message: ${msg}`;
-}
-
-// Parser JSON robuste
-function parseJSON(txt){
-  const clean=txt.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
-  const s=clean.indexOf('{'),e=clean.lastIndexOf('}');
-  if(s<0||e<0)throw new Error('Aucun JSON dans la réponse');
-  let str=clean.substring(s,e+1);
-  try{return JSON.parse(str);}catch(_){
-    str=str.replace(/,\s*$/,'');
-    let ob=0,ob2=0,ins=false,esc2=false;
-    for(const c of str){if(esc2){esc2=false;continue;}if(c==='\\'&&ins){esc2=true;continue;}if(c==='"'){ins=!ins;continue;}if(!ins){if(c==='{')ob++;else if(c==='}')ob--;else if(c==='[')ob2++;else if(c===']')ob2--;}}
-    while(ob2>0){str+=']';ob2--;}while(ob>0){str+='}';ob--;}
-    return JSON.parse(str);
+  } catch(e) {
+    show('el', false); show('lc', true);
+    document.getElementById('eb').innerHTML = `<div class="ebox">⚠️ ${esc(e.message)}</div>`;
+  } finally {
+    btn.disabled = false;
+    setL(false);
   }
 }
 
-// Render
-function render(j){
-  const ps=j.products||[];
-  let rows='';
-  for(const p of ps){
-    const bc=p.statut==='trouve'?'bok':p.statut==='introuvable'?'berr':'bwarn';
-    const bl=p.statut==='trouve'?'Trouvé':p.statut==='introuvable'?'Introuvable':'Manuel';
-    const src=p.source==='photo'?' 📸':'';
-    const ref=p.reference_believe&&p.reference_believe!=='N/A'?`<span class="ref">${esc(p.reference_believe)}</span>`:'<span style="color:var(--muted)">—</span>';
-    rows+=`<tr><td>${esc(p.nom_propre||p.nom_original)}${src}</td><td>${ref}</td><td>${p.quantite||'—'}</td><td>${esc(p.taille||'—')}</td><td><span class="badge ${bc}">${bl}</span></td></tr>`;
+// ── Render ────────────────────────────────────────────────────────────────────
+function render(j) {
+  const ps = j.products || [];
+  let rows = '';
+  for (const p of ps) {
+    const bc = p.statut === 'trouve' ? 'bok' : p.statut === 'introuvable' ? 'berr' : 'bwarn';
+    const bl = p.statut === 'trouve' ? 'Trouvé' : p.statut === 'introuvable' ? 'Introuvable' : 'Manuel';
+    const src = p.source === 'photo' ? ' 📸' : '';
+    const ref = p.reference_believe && p.reference_believe !== 'N/A'
+      ? `<span class="ref">${esc(p.reference_believe)}</span>`
+      : '<span style="color:var(--muted)">—</span>';
+    rows += `<tr><td>${esc(p.nom_propre||p.nom_original)}${src}</td><td>${ref}</td><td>${p.quantite||'—'}</td><td>${esc(p.taille||'—')}</td><td><span class="badge ${bc}">${bl}</span></td></tr>`;
   }
-  document.getElementById('pb').innerHTML=rows;
-  const d=j.destinataire||{};
-  document.getElementById('ad').innerHTML=(d.nom||d.adresse||d.telephone)?`<div class="acard"><div class="albl">📍 Livraison</div><p><strong>${esc(d.nom||'—')}</strong><br>${esc(d.adresse||'—')}<br>${esc(d.telephone||'—')}</p></div>`:'';
-  document.getElementById('al').innerHTML=(j.alertes||[]).map(a=>`<div class="alert ${a.type==='error'?'aerr':'awarn'}">⚠️ ${esc(a.message)}</div>`).join('');
-  document.getElementById('el').style.display='none';document.getElementById('lc').style.display='block';
-  if(j.message_whatsapp){document.getElementById('wo').textContent=j.message_whatsapp;document.getElementById('em').style.display='none';document.getElementById('mc').style.display='block';}
+  document.getElementById('pb').innerHTML = rows;
+
+  const d = j.destinataire || {};
+  document.getElementById('ad').innerHTML = (d.nom||d.adresse||d.telephone)
+    ? `<div class="acard"><div class="albl">📍 Livraison</div><p><strong>${esc(d.nom||'—')}</strong><br>${esc(d.adresse||'—')}<br>${esc(d.telephone||'—')}</p></div>`
+    : '';
+
+  document.getElementById('al').innerHTML = (j.alertes||[])
+    .map(a => `<div class="alert ${a.type==='error'?'aerr':'awarn'}">⚠️ ${esc(a.message)}</div>`)
+    .join('');
+
+  show('el', false); show('lc', true);
+
+  if (j.message_whatsapp) {
+    document.getElementById('wo').textContent = j.message_whatsapp;
+    show('em', false); show('mc', true);
+  }
 }
 
-function cp(){if(!lastMsg)return;navigator.clipboard.writeText(lastMsg).then(()=>{const b=document.querySelector('.bcopy');b.textContent='✅ Copié !';setTimeout(()=>b.textContent='📋 Copier le message',2000);});}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function show(id, v) { document.getElementById(id).style.display = v ? 'block' : 'none'; }
+function cp() {
+  if (!lastMsg) return;
+  navigator.clipboard.writeText(lastMsg).then(() => {
+    const b = document.querySelector('.bcp');
+    b.textContent = '✅ Copié !';
+    setTimeout(() => b.textContent = '📋 Copier le message', 2000);
+  });
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>
