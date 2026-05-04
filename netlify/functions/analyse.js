@@ -1,377 +1,204 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Assistant Commandes — D'or et de Platine</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#C9A84C;--black:#0A0A0A;--dark:#141414;--panel:#1C1C1C;--border:#2A2A2A;--text:#F0EDE8;--muted:#888;--green:#2ECC71;--orange:#F39C12;--red:#E74C3C;--radius:10px}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--black);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;font-size:14px}
+const https = require('https');
 
-/* HEADER */
-.hdr{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--dark)}
-.logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--black);flex-shrink:0}
-.ht h1{font-size:15px;font-weight:600}.ht p{font-size:12px;color:var(--muted);margin-top:2px}
-.ka{margin-left:auto;display:flex;align-items:center;gap:8px}
-.kdot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s}
-.kdot.ok{background:var(--green)}
-.kinput{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;width:260px;outline:none}
-.kinput:focus{border-color:var(--gold)}.kinput::placeholder{color:var(--muted)}
+const AIRTABLE_TOKEN = 'pataBCeGvhlN3N4Uq.cfa8a096a4b28fac19de4ea8006778cc5822fa610b9a2615cc144a4290e6a185';
+const AIRTABLE_BASE  = 'appouax19tnHJj0TD';
+const AIRTABLE_TABLE = 'tblGrm2yPn0ldTi01';
+const F_REF     = 'fld02IfEMQb0zorrD';
+const F_DESIGN  = 'fldba0MGx8lL3TQWS';
+const F_CAT     = 'fldayu3Yn6iraIcns';
 
-/* LAYOUT */
-.lay{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 61px)}
-.left{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.right{display:flex;flex-direction:column;overflow:hidden}
-.ptitle{padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.1em}
-.iwrap{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
+};
 
-/* INPUTS */
-textarea{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;line-height:1.65;resize:none;flex:1;min-height:180px;outline:none;transition:border-color .2s}
-textarea:focus{border-color:var(--gold)}textarea::placeholder{color:var(--muted)}
-.dz{border:1.5px dashed var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s}
-.dz:hover,.dz.drag{border-color:var(--gold);background:rgba(201,168,76,.05)}
-.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.dz .ic{font-size:18px;margin-bottom:3px}.dz p{font-size:12px;color:var(--muted)}.dz span{color:var(--gold);font-weight:600}
-.pvs{display:flex;flex-wrap:wrap;gap:8px}
-.tw{position:relative;display:inline-block}
-.th{width:58px;height:58px;border-radius:6px;object-fit:cover;border:1px solid var(--border)}
-.rb{position:absolute;top:-5px;right:-5px;background:var(--red);color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ldr{display:none;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:var(--muted)}
-.ldr.on{display:flex}
-.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-.bgo{width:100%;padding:12px;background:var(--gold);color:var(--black);border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:opacity .15s}
-.bgo:hover{opacity:.85}.bgo:disabled{opacity:.4;cursor:not-allowed}
-
-/* TABS */
-.tabs{display:flex;background:var(--dark);border-bottom:1px solid var(--border)}
-.tab{padding:12px 20px;font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.07em;transition:color .15s,border-color .15s}
-.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
-.tv{flex:1;overflow-y:auto;padding:20px;display:none}.tv.on{display:block}
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:10px;color:var(--muted);text-align:center}
-.empty .ei{font-size:30px;opacity:.35}.empty p{font-size:13px}
-
-/* TABLEAU PRODUITS */
-.pt{width:100%;border-collapse:collapse;font-size:12.5px}
-.pt th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
-.pt td{padding:9px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;line-height:1.4}
-.pt tr:last-child td{border-bottom:none}
-.ref{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);background:rgba(201,168,76,.1);padding:2px 6px;border-radius:4px;white-space:nowrap}
-.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em}
-.bok{background:rgba(46,204,113,.15);color:#2ECC71}
-.bwarn{background:rgba(243,156,18,.15);color:#F39C12}
-.berr{background:rgba(231,76,60,.15);color:#E74C3C}
-
-/* ADRESSE */
-.acard{margin-top:14px;background:var(--panel);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px}
-.albl{font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
-.acard p{font-size:13px;line-height:1.7}
-
-/* ALERTES */
-.alts{margin-top:12px;display:flex;flex-direction:column;gap:8px}
-.alert{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5;border-left:3px solid}
-.awarn{background:rgba(243,156,18,.1);border-color:var(--orange);color:#F5C053}
-.aerr{background:rgba(231,76,60,.1);border-color:var(--red);color:#EC8076}
-
-/* MESSAGE WA */
-.wabox{background:var(--panel);border-left:3px solid #25D366;border-radius:var(--radius);padding:16px 18px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word;font-family:'DM Mono',monospace;margin-bottom:12px}
-.bcp{padding:10px 24px;background:#25D366;color:white;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
-.bcp:hover{opacity:.85}
-.bemail{padding:10px 24px;background:var(--panel);color:var(--gold);border:1px solid var(--gold);border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;margin-left:8px}
-.bemail:hover{opacity:.85}
-.btns{display:flex;gap:8px;flex-wrap:wrap}
-
-/* ERREUR */
-.ebox{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:#EC8076;margin-bottom:12px;line-height:1.5;word-break:break-all}
-
-@media(max-width:640px){.lay{grid-template-columns:1fr;height:auto}.left{border-right:none;border-bottom:1px solid var(--border)}.ka{display:none}}
-</style>
-</head>
-<body>
-
-<div class="hdr">
-  <div class="logo">D&P</div>
-  <div class="ht">
-    <h1>Assistant Commandes WhatsApp</h1>
-    <p>D'or et de Platine — Analyse & Confirmation</p>
-  </div>
-  <div class="ka">
-    <div class="kdot" id="kd"></div>
-    <input class="kinput" type="password" id="ki" placeholder="Clé API Anthropic sk-ant-..." oninput="onKey()"/>
-  </div>
-</div>
-
-<div class="lay">
-  <!-- GAUCHE : saisie -->
-  <div class="left">
-    <div class="ptitle">📱 Message WhatsApp reçu</div>
-    <div class="iwrap">
-      <textarea id="mi" rows="10" placeholder="Collez ici le message WhatsApp reçu...&#10;&#10;Exemple :&#10;Bonjour, je voudrais 2 casquettes D&P Club taille M&#10;et 1 survêtement noir XL&#10;&#10;Livraison : Marie Dupont&#10;12 rue de la Paix, 75001 Paris&#10;06 12 34 56 78"></textarea>
-
-      <div class="dz" id="dz">
-        <input type="file" id="fi" accept="image/*" multiple onchange="addFiles(this.files)"/>
-        <div class="ic">📸</div>
-        <p>Glissez les <span>captures du site</span> ici<br>ou cliquez pour sélectionner</p>
-      </div>
-
-      <div class="pvs" id="pv"></div>
-
-      <div class="ldr" id="ld">
-        <div class="spin"></div>
-        <span id="lm">Analyse...</span>
-      </div>
-
-      <button class="bgo" id="bg" onclick="go()">Analyser la commande →</button>
-    </div>
-  </div>
-
-  <!-- DROITE : résultats -->
-  <div class="right">
-    <div class="tabs">
-      <div class="tab on" id="t1" onclick="stab('list')">📦 Liste produits</div>
-      <div class="tab" id="t2" onclick="stab('msg')">💬 Message WhatsApp</div>
-    </div>
-
-    <div class="tv on" id="vl">
-      <div class="empty" id="el"><div class="ei">📋</div><p>La liste apparaîtra ici<br>après analyse</p></div>
-      <div id="lc" style="display:none">
-        <div id="eb"></div>
-        <table class="pt">
-          <thead><tr><th>Produit</th><th>Réf Believe</th><th>Qté</th><th>Taille</th><th></th></tr></thead>
-          <tbody id="pb"></tbody>
-        </table>
-        <div id="ad"></div>
-        <div class="alts" id="al"></div>
-      </div>
-    </div>
-
-    <div class="tv" id="vm">
-      <div class="empty" id="em"><div class="ei">💬</div><p>Le message apparaîtra ici<br>après analyse</p></div>
-      <div id="mc" style="display:none">
-        <div class="wabox" id="wo"></div>
-        <div class="btns">
-  <button class="bcp" onclick="cp()">📋 Copier le message</button>
-  <button class="bemail" onclick="sendEmail()">✉️ Envoyer par email</button>
-</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── État global ───────────────────────────────────────────────────────────────
-let photos = [];
-let lastMsg = '';
-let lastResult = null;
-
-// ── Clé API ───────────────────────────────────────────────────────────────────
-function onKey() {
-  const k = document.getElementById('ki').value.trim();
-  localStorage.setItem('dp_k', k);
-  document.getElementById('kd').className = 'kdot' + (k.startsWith('sk-ant-') ? ' ok' : '');
-}
-window.addEventListener('load', () => {
-  const s = localStorage.getItem('dp_k') || '';
-  if (s) { document.getElementById('ki').value = s; document.getElementById('kd').className = 'kdot' + (s.startsWith('sk-ant-') ? ' ok' : ''); }
-});
-function key() { return (document.getElementById('ki').value || localStorage.getItem('dp_k') || '').trim(); }
-
-// ── Tabs ──────────────────────────────────────────────────────────────────────
-function stab(t) {
-  ['t1','t2'].forEach((id,i) => document.getElementById(id).className = 'tab' + (t===['list','msg'][i]?' on':''));
-  ['vl','vm'].forEach((id,i) => document.getElementById(id).className = 'tv' + (t===['list','msg'][i]?' on':''));
-}
-
-// ── Photos ────────────────────────────────────────────────────────────────────
-const dze = document.getElementById('dz');
-dze.addEventListener('dragover', e => { e.preventDefault(); dze.classList.add('drag'); });
-dze.addEventListener('dragleave', () => dze.classList.remove('drag'));
-dze.addEventListener('drop', e => { e.preventDefault(); dze.classList.remove('drag'); addFiles(e.dataTransfer.files); });
-
-function addFiles(files) {
-  for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
-    compress(f).then(p => { photos.push(p); rp(); });
-  }
-}
-
-function compress(file) {
-  return new Promise(res => {
-    const img = new Image(), url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const M = 800;
-      let w = img.width, h = img.height;
-      if (w > M) { h = Math.round(h*M/w); w = M; }
-      if (h > M) { w = Math.round(w*M/h); h = M; }
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      res({ data: c.toDataURL('image/jpeg', .65).split(',')[1], type: 'image/jpeg', name: file.name });
-    };
-    img.src = url;
+function claudeCall(apiKey, body) {
+  const s = JSON.stringify(body);
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(s),
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      }
+    }, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, data: JSON.parse(Buffer.concat(chunks).toString()) }); }
+        catch(e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.write(s);
+    req.end();
   });
 }
 
-function rp() {
-  const el = document.getElementById('pv');
-  el.innerHTML = '';
-  photos.forEach((p, i) => {
-    const w = document.createElement('div');
-    w.className = 'tw';
-    w.innerHTML = `<img class="th" src="data:${p.type};base64,${p.data}" title="${esc(p.name)}"><button class="rb" onclick="del(${i})">✕</button>`;
-    el.appendChild(w);
+function airtableGet(path) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.airtable.com', path, method: 'GET',
+      headers: { 'Authorization': `Bearer ${AIRTABLE_TOKEN}` }
+    }, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        try { resolve(JSON.parse(Buffer.concat(chunks).toString())); }
+        catch(e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.end();
   });
 }
-function del(i) { photos.splice(i, 1); rp(); }
 
-// ── Loader ────────────────────────────────────────────────────────────────────
-function setL(on, msg) {
-  document.getElementById('ld').className = 'ldr' + (on ? ' on' : '');
-  if (msg) document.getElementById('lm').textContent = msg;
-}
-
-// ── Analyse principale ────────────────────────────────────────────────────────
-async function go() {
-  const k = key();
-  if (!k.startsWith('sk-ant-')) { alert('Entrez votre clé API Anthropic en haut à droite'); return; }
-  const msg = document.getElementById('mi').value.trim();
-  if (!msg) { alert('Collez un message WhatsApp'); return; }
-
-  const btn = document.getElementById('bg');
-  btn.disabled = true;
-  setL(true, 'Analyse du message...');
-  show('el', false); show('lc', false);
-  show('em', false); show('mc', false);
-  document.getElementById('eb').innerHTML = '';
-
+// Recherche Airtable par mots-clés + catégorie optionnelle
+async function findRef(designation, categorie) {
   try {
-    // Étape 1 : identifier les produits des photos (appel direct Anthropic — images)
-    const photoNames = [];
-    for (let i = 0; i < photos.length; i++) {
-      setL(true, `Analyse photo ${i+1}/${photos.length}...`);
-      try {
-        const r = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': k,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true'
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-5',
-            max_tokens: 100,
-            messages: [{ role: 'user', content: [
-              { type: 'image', source: { type: 'base64', media_type: photos[i].type, data: photos[i].data } },
-              { type: 'text', text: "Cette image est une capture d'écran du site doretdeplatineshop.com. Identifie le nom exact du produit en cherchant dans cet ordre : 1) le titre du produit en gras sur la page (ex: MAILLOT - ENERGY SAMBA), 2) le fil de navigation breadcrumb en haut (ex: Accueil / ... / CASQUETTE - D&P CLUB), 3) le titre de l'onglet du navigateur. Réponds UNIQUEMENT avec le nom exact du produit tel qu'il apparaît sur le site, sans aucun autre texte." }
-            ]}]
-          })
-        });
-        if (r.ok) {
-          const d = await r.json();
-          const n = (d.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
-          if (n) photoNames.push(n);
-        }
-      } catch(e) { console.warn('Photo err:', e); }
+    const mots = designation.split(/[\s\-–]+/).filter(w => w.length > 3).slice(0, 3);
+    if (mots.length === 0) return null;
+
+    const searchConds = mots.map(m =>
+      `SEARCH("${m.toLowerCase().replace(/"/g, '')}", LOWER({${F_DESIGN}}))`
+    );
+    let formula = mots.length > 1 ? `OR(${searchConds.join(', ')})` : searchConds[0];
+
+    // Ajouter filtre catégorie si dispo
+    if (categorie) {
+      formula = `AND({${F_CAT}}="${categorie}", ${formula})`;
     }
 
-    // Étape 2 : tout envoyer à la fonction Netlify (Claude + Airtable côté serveur)
-    setL(true, 'Recherche des produits et références Believe...');
-    const resp = await fetch('/api/analyse', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: k, message: msg, photoNames })
-    });
+    const qs = new URLSearchParams({ filterByFormula: formula, maxRecords: '5' });
+    qs.append('fields[]', F_DESIGN);
+    qs.append('fields[]', F_REF);
+    qs.append('fields[]', F_CAT);
 
-    const raw = await resp.text();
-    let json;
-    try { json = JSON.parse(raw); } catch(e) { throw new Error('Réponse invalide: ' + raw.substring(0, 200)); }
+    const res = await airtableGet(`/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}?${qs.toString()}`);
 
-    if (!resp.ok) throw new Error(json.error || 'Erreur ' + resp.status);
+    if (!res.records || res.records.length === 0) {
+      // Fallback sans catégorie
+      if (categorie) return findRef(designation, null);
+      return null;
+    }
 
-    lastMsg = json.message_whatsapp || '';
-    render(json);
+    // Meilleur match : produit avec le plus de mots en commun
+    const desigLower = designation.toLowerCase();
+    let best = res.records[0], bestScore = 0;
+    for (const r of res.records) {
+      const nom = (r.fields[F_DESIGN] || '').toLowerCase();
+      const score = mots.filter(m => nom.includes(m.toLowerCase())).length;
+      if (score > bestScore) { best = r; bestScore = score; }
+    }
 
+    return best.fields[F_REF] || null;
   } catch(e) {
-    show('el', false); show('lc', true);
-    document.getElementById('eb').innerHTML = `<div class="ebox">⚠️ ${esc(e.message)}</div>`;
-  } finally {
-    btn.disabled = false;
-    setL(false);
+    console.error('findRef error:', e.message);
+    return null;
   }
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
-function render(j) {
-  lastResult = j;
-  const ps = j.products || [];
-  let rows = '';
-  for (const p of ps) {
-    const bc = p.statut === 'trouve' ? 'bok' : p.statut === 'introuvable' ? 'berr' : 'bwarn';
-    const bl = p.statut === 'trouve' ? 'Trouvé' : p.statut === 'introuvable' ? 'Introuvable' : 'Manuel';
-    const src = p.source === 'photo' ? ' 📸' : '';
-    const ref = p.reference_believe && p.reference_believe !== 'N/A'
-      ? `<span class="ref">${esc(p.reference_believe)}</span>`
-      : '<span style="color:var(--muted)">—</span>';
-    rows += `<tr><td>${esc(p.nom_propre||p.nom_original)}${src}</td><td>${ref}</td><td>${p.quantite||'—'}</td><td>${esc(p.taille||'—')}</td><td><span class="badge ${bc}">${bl}</span></td></tr>`;
-  }
-  document.getElementById('pb').innerHTML = rows;
+exports.handler = async function(event) {
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: '{}' };
 
-  const d = j.destinataire || {};
-  document.getElementById('ad').innerHTML = (d.nom||d.adresse||d.telephone)
-    ? `<div class="acard"><div class="albl">📍 Livraison</div><p><strong>${esc(d.nom||'—')}</strong><br>${esc(d.adresse||'—')}<br>${esc(d.telephone||'—')}</p></div>`
+  let body = {};
+  try { body = JSON.parse(event.body || '{}'); } catch(e) {}
+
+  const apiKey = (body.apiKey || '').trim();
+  if (!apiKey.startsWith('sk-ant-')) {
+    return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Clé API invalide' }) };
+  }
+
+  const { message, photoNames = [] } = body;
+  if (!message) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Message manquant' }) };
+
+  // Construire le contexte photos pour le prompt
+  const photosCtx = photoNames.length > 0
+    ? '\n\nProduits identifiés depuis les captures d\'écran du site doretdeplatineshop.com :\n'
+      + photoNames.map((n, i) => `- Photo ${i+1}: ${n}`).join('\n')
+      + '\nCes produits sont à inclure dans la commande.'
     : '';
 
-  document.getElementById('al').innerHTML = (j.alertes||[])
-    .map(a => `<div class="alert ${a.type==='error'?'aerr':'awarn'}">⚠️ ${esc(a.message)}</div>`)
-    .join('');
+  // ── Étape 1 : Claude analyse message + produits photos ───────────
+  const step1 = `Tu es un assistant pour D'or et de Platine. Analyse ce message WhatsApp et identifie tous les produits commandés.
+Les produits peuvent venir du texte du message ET des captures d'écran jointes.${photosCtx}
 
-  show('el', false); show('lc', true);
+Règles adresse: CP seul→déduis ville (13012=Marseille 12e, 75001=Paris 1er, 69001=Lyon 1er, 33000=Bordeaux, 06000=Nice, 31000=Toulouse, 59000=Lille, 44000=Nantes, 76000=Rouen, 67000=Strasbourg).
+Règles alertes: adresse incomplète (manque rue/CP/ville/téléphone), quantité manquante, taille manquante (textile).
 
-  if (j.message_whatsapp) {
-    document.getElementById('wo').textContent = j.message_whatsapp;
-    show('em', false); show('mc', true);
+Pour chaque produit, extrais la catégorie parmi: T-shirt, Casquette, Sweat, Survêtement, Short, Pantalon, Veste, Claquette, Accessoire, Vinyle, CD, USB, Pack, Ballon, Chevalière, Coque téléphone, Maillot, Cagoule.
+
+JSON UNIQUEMENT sans markdown:
+{"products":[{"nom_original":"texte brut ou nom photo","nom_propre":"nom exact tel qu'affiché sur le site","categorie":"catégorie ou null","quantite":1,"taille":"taille ou N/A","source":"texte ou photo"}],"destinataire":{"nom":"","adresse":"","telephone":""},"alertes":[{"type":"warning","message":""}]}
+
+Message WhatsApp: ${message}`;
+
+  let result;
+  try {
+    const r = await claudeCall(apiKey, {
+      model: 'claude-sonnet-4-5',
+      max_tokens: 1200,
+      messages: [{ role: 'user', content: step1 }]
+    });
+    if (r.status !== 200) throw new Error(r.data.error?.message || 'Erreur Claude ' + r.status);
+    const text = (r.data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    result = parseJSON(text);
+  } catch(e) {
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
+  }
+
+  // ── Étape 2 : Enrichir refs Believe via Airtable REST ────────────
+  if (result.products) {
+    for (const p of result.products) {
+      const nom = (p.nom_propre || p.nom_original || '').trim();
+      p.reference_believe = 'N/A';
+      p.statut = 'introuvable';
+      if (!nom) continue;
+      const ref = await findRef(nom, p.categorie || null);
+      if (ref) { p.reference_believe = ref; p.statut = 'trouve'; }
+    }
+  }
+
+  // ── Étape 3 : Message WhatsApp formaté ───────────────────────────
+  const d = result.destinataire || {};
+  const prodLines = (result.products || []).map(p =>
+    `- ${p.nom_propre||p.nom_original} | Réf: ${p.reference_believe} | Qté: ${p.quantite||'?'} | Taille: ${p.taille||'?'}`
+  ).join('\n');
+  const alertes = (result.alertes || []).map(a => `⚠️ ${a.message}`).join('\n');
+
+  try {
+    const r = await claudeCall(apiKey, {
+      model: 'claude-sonnet-4-5',
+      max_tokens: 600,
+      messages: [{ role: 'user', content: `Génère un message WhatsApp de confirmation commande D'or et de Platine. Tutoiement, *gras*, emojis, ━━━.
+Produits:\n${prodLines}
+Livraison: ${d.nom||'?'}, ${d.adresse||'?'}, ${d.telephone||'?'}
+${alertes ? 'Infos manquantes à signaler:\n' + alertes : ''}
+Retourne UNIQUEMENT le message WhatsApp.` }]
+    });
+    if (r.status === 200) {
+      result.message_whatsapp = (r.data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    }
+  } catch(e) {}
+
+  return { statusCode: 200, headers: CORS, body: JSON.stringify(result) };
+};
+
+function parseJSON(text) {
+  const clean = text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+  const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+  if (s<0||e<0) throw new Error('Aucun JSON');
+  let str = clean.substring(s,e+1);
+  try { return JSON.parse(str); } catch(_) {
+    str = str.replace(/,\s*$/,'');
+    let ob=0,ob2=0,ins=false,esc=false;
+    for(const c of str){if(esc){esc=false;continue;}if(c==='\\'&&ins){esc=true;continue;}if(c==='"'){ins=!ins;continue;}if(!ins){if(c==='{')ob++;else if(c==='}')ob--;if(c==='[')ob2++;else if(c===']')ob2--;}}
+    while(ob2>0){str+=']';ob2--;}while(ob>0){str+='}';ob--;}
+    return JSON.parse(str);
   }
 }
-
-// ── Utils ─────────────────────────────────────────────────────────────────────
-function show(id, v) { document.getElementById(id).style.display = v ? 'block' : 'none'; }
-function buildEmailBody(j) {
-  if (!j) return '';
-  const ps = j.products || [];
-  let body = 'Hello,%0A%0APeux-tu passer la commande producteur suivante dans MVS et me partager le n° de suivi quand disponible stp ?%0A%0A';
-  body += 'LISTE DE PRODUITS%0A';
-  body += '────────────────────────%0A';
-  ps.forEach((p, i) => {
-    body += (i+1) + '. ' + (p.nom_propre || p.nom_original) + '%0A';
-    body += '   Ref Believe : ' + (p.reference_believe && p.reference_believe !== 'N/A' ? p.reference_believe : 'A completer') + '%0A';
-    body += '   Quantite    : ' + (p.quantite || '—') + '%0A';
-    body += '   Taille      : ' + (p.taille || '—') + '%0A%0A';
-  });
-  body += '%0AMerci';
-  return body;
-}
-
-function sendEmail() {
-  if (!lastResult) { alert("Analysez d'abord une commande"); return; }
-  const dest = lastResult.destinataire || {};
-  const subject = encodeURIComponent("Commande D'or et de Platine — " + (dest.nom || 'Client'));
-  const body = buildEmailBody(lastResult);
-  window.open('https://mail.google.com/mail/?view=cm&fs=1&su=' + subject + '&body=' + body, '_blank');
-}
-
-function cp() {
-  if (!lastMsg) return;
-  navigator.clipboard.writeText(lastMsg).then(() => {
-    const b = document.querySelector('.bcp');
-    b.textContent = '✅ Copié !';
-    setTimeout(() => b.textContent = '📋 Copier le message', 2000);
-  });
-}
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-</script>
-</body>
-</html>
