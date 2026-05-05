@@ -266,7 +266,7 @@ async function go() {
             max_tokens: 100,
             messages: [{ role: 'user', content: [
               { type: 'image', source: { type: 'base64', media_type: photos[i].type, data: photos[i].data } },
-              { type: 'text', text: "Cette image peut être une capture du site doretdeplatineshop.com OU une photo d'un produit JuL (D'or et de Platine). Identifie le nom exact du produit en cherchant dans cet ordre : 1) le titre du produit en gras sur la page, 2) le fil de navigation breadcrumb (ex: CASQUETTE - MOTORSPORT), 3) le titre de l'onglet navigateur, 4) si c'est une photo de produit directe, décris le type et les éléments visuels distinctifs (ex: T-SHIRT NOIR OVNI, CASQUETTE BLEUE D&P). Réponds UNIQUEMENT avec le nom exact ou la description du produit, sans aucun autre texte." }
+              { type: 'text', text: "Cette image est soit une capture du site doretdeplatineshop.com, soit une photo directe d'un produit JuL. Identifie le produit ainsi : 1) Si c'est une capture du site : lis le breadcrumb en haut (ex: CASQUETTE - MOTORSPORT) ou le titre en gras. 2) Si c'est une photo directe : identifie le type de vêtement/accessoire et les éléments visuels distinctifs (couleur, logo, motif, texte visible). Réponds TOUJOURS avec une réponse courte et précise (ex: 'CASQUETTE MOTORSPORT', 'T-SHIRT NOIR LOGO OVNI', 'SWEAT BLEU D&P'). Ne réponds jamais avec une phrase vide ou 'impossible à identifier'." }
             ]}]
           })
         });
