@@ -202,8 +202,9 @@ exports.handler = async function(event) {
 CP→ville: 13012=Marseille 12e,75001=Paris 1er,69001=Lyon 1er,33000=Bordeaux,06000=Nice,31000=Toulouse,59000=Lille,44000=Nantes,76000=Rouen,67000=Strasbourg,13090=Aix-en-Provence,13100=Aix-en-Provence.
 RÈGLE TAILLES: "14 ans" ET "XS" → enfant pour 14 ans, adulte pour XS.
 RÈGLE QUANTITÉ: N produits du même type vague → N lignes différentes du même type.
-RÈGLE PHOTOS: Si une photo identifie un produit précis, est_vague=false même si le texte est vague ("je veux ce produit", "celui-là", etc.). Le nom_propre doit être le nom exact de la photo.
-RÈGLE VAGUE: est_vague=true UNIQUEMENT si ni le texte ni les photos ne permettent d'identifier le produit précisément (ex: "un t-shirt" sans photo ni précision).
+RÈGLE PHOTOS: Si des photos sont mentionnées (liste Photos ci-dessus), utilise TOUJOURS leur nom comme produit précis. est_vague=false si une photo est fournie. nom_propre = nom exact de la photo.
+RÈGLE VAGUE: est_vague=true UNIQUEMENT si ni le texte ni les photos ne permettent d'identifier le produit (ex: "un t-shirt" sans aucune photo).
+RÈGLE TYPE DEPUIS PHOTO: Si la photo donne un type vague (ex: "T-SHIRT NOIR LOGO OVNI"), extrais le type_produit=t-shirt et met est_vague=false pour chercher ce produit dans Airtable.
 Alertes: adresse incomplète, quantité manquante, taille manquante (textile).
 
 Pour chaque produit: type parmi t-shirt/sweat/veste/pantalon/short/casquette/bob/bonnet/cagoule/claquette/bijoux/chevalière/coque/sac/vinyle/cd/usb/goodie/accessoire/chaussette.
