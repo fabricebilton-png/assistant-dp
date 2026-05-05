@@ -202,9 +202,10 @@ exports.handler = async function(event) {
 CP→ville: 13012=Marseille 12e,75001=Paris 1er,69001=Lyon 1er,33000=Bordeaux,06000=Nice,31000=Toulouse,59000=Lille,44000=Nantes,76000=Rouen,67000=Strasbourg,13090=Aix-en-Provence,13100=Aix-en-Provence.
 RÈGLE TAILLES: "14 ans" ET "XS" → enfant pour 14 ans, adulte pour XS.
 RÈGLE QUANTITÉ: N produits du même type vague → N lignes différentes du même type.
+RÈGLE PHOTOS: Si une photo identifie un produit précis, est_vague=false même si le texte est vague ("je veux ce produit", "celui-là", etc.). Le nom_propre doit être le nom exact de la photo.
+RÈGLE VAGUE: est_vague=true UNIQUEMENT si ni le texte ni les photos ne permettent d'identifier le produit précisément (ex: "un t-shirt" sans photo ni précision).
 Alertes: adresse incomplète, quantité manquante, taille manquante (textile).
 
-Utilise les produits du site ci-dessus pour identifier les noms exacts des produits commandés.
 Pour chaque produit: type parmi t-shirt/sweat/veste/pantalon/short/casquette/bob/bonnet/cagoule/claquette/bijoux/chevalière/coque/sac/vinyle/cd/usb/goodie/accessoire/chaussette.
 
 JSON UNIQUEMENT:
