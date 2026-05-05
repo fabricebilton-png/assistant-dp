@@ -266,7 +266,7 @@ async function go() {
             max_tokens: 100,
             messages: [{ role: 'user', content: [
               { type: 'image', source: { type: 'base64', media_type: photos[i].type, data: photos[i].data } },
-              { type: 'text', text: "Cette image est une capture d'écran du site doretdeplatineshop.com. Identifie le nom exact du produit en cherchant dans cet ordre : 1) le titre du produit en gras sur la page (ex: MAILLOT - ENERGY SAMBA), 2) le fil de navigation breadcrumb en haut (ex: Accueil / ... / CASQUETTE - D&P CLUB), 3) le titre de l'onglet du navigateur. Réponds UNIQUEMENT avec le nom exact du produit tel qu'il apparaît sur le site, sans aucun autre texte." }
+              { type: 'text', text: "Cette image peut être une capture du site doretdeplatineshop.com OU une photo d'un produit JuL (D'or et de Platine). Identifie le nom exact du produit en cherchant dans cet ordre : 1) le titre du produit en gras sur la page, 2) le fil de navigation breadcrumb (ex: CASQUETTE - MOTORSPORT), 3) le titre de l'onglet navigateur, 4) si c'est une photo de produit directe, décris le type et les éléments visuels distinctifs (ex: T-SHIRT NOIR OVNI, CASQUETTE BLEUE D&P). Réponds UNIQUEMENT avec le nom exact ou la description du produit, sans aucun autre texte." }
             ]}]
           })
         });
